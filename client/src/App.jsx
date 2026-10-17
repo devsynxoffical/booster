@@ -6,19 +6,14 @@ import {
   Share2, 
   Eye, 
   BookOpen, 
-  Zap, 
-  Star,
-  FileText,
-  BarChart2,
-  Bell,
-  Inbox,
-  Moon,
-  ChevronsUpDown,
-  Download,
-  Plus,
-  Store,
-  ShieldCheck,
-  CheckCircle2
+  BarChart2, 
+  Bell, 
+  Moon, 
+  ChevronsUpDown, 
+  Plus, 
+  Store, 
+  Layers,
+  ChevronDown
 } from 'lucide-react';
 
 import DashboardView from './components/DashboardView.jsx';
@@ -32,14 +27,8 @@ import ShopifyConnectModal from './components/ShopifyConnectModal.jsx';
 export default function App() {
   const [currentView, setCurrentView] = useState('dashboard');
   const [isConnectModalOpen, setIsConnectModalOpen] = useState(false);
-  const [connection, setConnection] = useState({
-    isConnected: false,
-    shopDomain: "",
-    publicAppUrl: "http://localhost:3005",
-    storeDetails: { name: "Connect Store", email: "", currency: "USD", domain: "" },
-    realProductCount: 0,
-    realOrderCount: 0
-  });
+  const [storesData, setStoresData] = useState({ activeStoreId: null, stores: [], appConfig: {} });
+  const [activeStore, setActiveStore] = useState(null);
 
   const [stats, setStats] = useState({
     totalVisitors: 0,
@@ -79,26 +68,30 @@ export default function App() {
     themeMode: "light"
   });
 
-  const refreshAllData = () => {
-    fetch('/api/shopify/status')
-      .then(res => res.json())
-      .then(data => setConnection(data))
-      .catch(() => {});
+  const refreshAllData = async () => {
+    try {
+      const storesRes = await fetch('/api/stores');
+      const sData = await storesRes.json();
+      setStoresData(sData);
 
-    fetch('/api/stats')
-      .then(res => res.json())
-      .then(data => setStats(data))
-      .catch(() => {});
+      const active = sData.stores?.find(s => s.id === sData.activeStoreId) || sData.stores?.[0] || null;
+      setActiveStore(active);
 
-    fetch('/api/config')
-      .then(res => res.json())
-      .then(data => setConfig(data))
-      .catch(() => {});
+      const statsRes = await fetch('/api/stats');
+      const stData = await statsRes.json();
+      setStats(stData);
+
+      const configRes = await fetch('/api/config');
+      const cfgData = await configRes.json();
+      setConfig(cfgData);
+    } catch (e) {
+      console.error(e);
+    }
   };
 
   useEffect(() => {
     refreshAllData();
-    const interval = setInterval(refreshAllData, 10000); // Poll live stats every 10s
+    const interval = setInterval(refreshAllData, 10000);
     return () => clearInterval(interval);
   }, []);
 
@@ -115,6 +108,19 @@ export default function App() {
     }
   };
 
+  const handleSwitchStore = async (storeId) => {
+    try {
+      await fetch('/api/stores/switch', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ storeId })
+      });
+      refreshAllData();
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
   const getBreadcrumbTitle = () => {
     switch(currentView) {
       case 'dashboard': return 'Dashboard';
@@ -122,18 +128,18 @@ export default function App() {
       case 'widgets': return 'Conversion Widgets';
       case 'social': return 'Social Syndication';
       case 'simulator': return 'Storefront Simulator';
-      case 'guide': return 'Setup Guide';
+      case 'guide': return 'Go Live Guide';
       default: return 'Dashboard';
     }
   };
 
-  const storeInitials = connection?.storeDetails?.name 
-    ? connection.storeDetails.name.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase()
+  const storeInitials = activeStore?.storeName 
+    ? activeStore.storeName.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase()
     : 'SA';
 
   return (
     <div className="app-container">
-      {/* Sidebar (Adminator Style) */}
+      {/* Sidebar */}
       <aside className="sidebar">
         <div className="sidebar-header">
           <div className="brand-badge">
@@ -141,11 +147,43 @@ export default function App() {
               B
             </div>
             <div className="brand-title-wrap">
-              <div className="brand-title">Shopify Booster</div>
+              <div className="brand-title">Growth Booster</div>
               <div className="brand-subtitle">
-                {connection?.isConnected ? '● Connected Live' : '○ Setup Required'}
+                {storesData.stores?.length > 0 ? `${storesData.stores.length} Stores Connected` : 'Multi-Store SaaS'}
               </div>
             </div>
+          </div>
+        </div>
+
+        {/* Store Selector Pill in Sidebar */}
+        <div style={{ padding: '0 14px 10px 14px' }}>
+          <div 
+            onClick={() => setIsConnectModalOpen(true)}
+            style={{
+              padding: '8px 12px',
+              borderRadius: '8px',
+              background: '#f8fafc',
+              border: '1px solid #e2e8f0',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              cursor: 'pointer',
+              transition: 'all 0.15s ease'
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', minWidth: 0 }}>
+              <span style={{
+                width: '8px',
+                height: '8px',
+                borderRadius: '50%',
+                background: activeStore ? '#10b981' : '#94a3b8',
+                flexShrink: 0
+              }}></span>
+              <span style={{ fontSize: '12px', fontWeight: 700, color: '#0f172a', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                {activeStore ? activeStore.storeName : '+ Connect Store'}
+              </span>
+            </div>
+            <ChevronsUpDown size={14} color="#64748b" style={{ flexShrink: 0 }} />
           </div>
         </div>
 
@@ -166,9 +204,9 @@ export default function App() {
             style={{ cursor: 'pointer' }}
           >
             <Store size={16} className="nav-icon" />
-            <span>Live Store</span>
-            <span className={connection?.isConnected ? "nav-badge-green" : "nav-badge-blue"}>
-              {connection?.isConnected ? "LIVE" : "CONNECT"}
+            <span>Multi-Store</span>
+            <span className="nav-badge-blue">
+              {storesData.stores?.length || 0}
             </span>
           </div>
 
@@ -213,12 +251,12 @@ export default function App() {
             className={`nav-item ${currentView === 'guide' ? 'active' : ''}`}
             onClick={() => setCurrentView('guide')}
           >
-            <FileText size={16} className="nav-icon" />
+            <BookOpen size={16} className="nav-icon" />
             <span>Go Live Guide</span>
           </div>
         </nav>
 
-        {/* Sidebar Footer Real Store Profile */}
+        {/* Sidebar Footer User / Store Profile */}
         <div className="sidebar-footer" onClick={() => setIsConnectModalOpen(true)} style={{ cursor: 'pointer' }}>
           <div className="user-profile">
             <div className="avatar-circle">
@@ -226,10 +264,10 @@ export default function App() {
             </div>
             <div className="user-info">
               <div className="user-name" style={{ maxWidth: '130px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                {connection?.storeDetails?.name || 'Connect Store'}
+                {activeStore?.storeName || 'Add Store'}
               </div>
               <div className="user-role">
-                {connection?.isConnected ? connection.shopDomain : 'Click to connect'}
+                {activeStore ? activeStore.shopDomain : 'Click to add store'}
               </div>
             </div>
           </div>
@@ -245,16 +283,37 @@ export default function App() {
             <span className="crumb-muted">Workspace</span>
             <span className="crumb-separator">›</span>
             <span className="crumb-active">{getBreadcrumbTitle()}</span>
+            {activeStore && (
+              <>
+                <span className="crumb-separator">›</span>
+                <span style={{ fontSize: '12px', background: '#eff6ff', color: '#2563eb', padding: '2px 8px', borderRadius: '4px', fontWeight: 600 }}>
+                  {activeStore.storeName}
+                </span>
+              </>
+            )}
           </div>
 
           <div className="top-nav-actions">
+            {/* Quick Store Switcher if multiple stores exist */}
+            {storesData.stores && storesData.stores.length > 1 && (
+              <select 
+                className="form-select"
+                style={{ width: 'auto', padding: '5px 10px', fontSize: '12px', background: '#f8fafc' }}
+                value={storesData.activeStoreId || ''}
+                onChange={(e) => handleSwitchStore(e.target.value)}
+              >
+                {storesData.stores.map(s => (
+                  <option key={s.id} value={s.id}>{s.storeName} ({s.shopDomain})</option>
+                ))}
+              </select>
+            )}
+
             <button 
               className="btn btn-blue"
               onClick={() => setIsConnectModalOpen(true)}
               style={{ fontSize: '12px', padding: '6px 12px' }}
             >
-              <Store size={14} />
-              {connection?.isConnected ? 'Store Settings' : 'Connect Store'}
+              <Plus size={14} /> Add / Switch Store
             </button>
 
             <button className="nav-icon-btn" aria-label="Notifications" onClick={refreshAllData} title="Refresh Live Data">
@@ -269,7 +328,7 @@ export default function App() {
               className="avatar-circle" 
               style={{ width: '32px', height: '32px', fontSize: '11.5px', marginLeft: '4px', cursor: 'pointer' }}
               onClick={() => setIsConnectModalOpen(true)}
-              title="Manage Shopify Connection"
+              title="Manage Stores"
             >
               {storeInitials}
             </div>
@@ -282,7 +341,13 @@ export default function App() {
             <DashboardView 
               stats={stats} 
               config={config} 
-              connection={connection}
+              connection={{
+                isConnected: !!activeStore,
+                shopDomain: activeStore?.shopDomain || '',
+                storeDetails: { name: activeStore?.storeName || 'Add Your First Store' },
+                realProductCount: activeStore?.productsCount || 0,
+                realOrderCount: activeStore?.ordersCount || 0
+              }}
               onOpenConnect={() => setIsConnectModalOpen(true)}
               onNavigate={setCurrentView}
             />
@@ -318,12 +383,11 @@ export default function App() {
         </main>
       </div>
 
-      {/* Shopify Connection Modal */}
+      {/* Multi-Store Manager Modal */}
       <ShopifyConnectModal 
         isOpen={isConnectModalOpen}
         onClose={() => setIsConnectModalOpen(false)}
-        connectionStatus={connection}
-        onConnectionSuccess={refreshAllData}
+        onStoreChanged={refreshAllData}
       />
     </div>
   );

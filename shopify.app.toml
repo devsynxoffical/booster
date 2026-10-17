@@ -1,5 +1,6 @@
 # Shopify App Configuration for Booster Growth Platform
-name = "Shopify Growth & Organic Sales Booster"
+client_id = "bc4244d5d21d40ac26fb7e0154a47d35"
+name = "Growth Booster & Organic Sales"
 handle = "shopify-growth-booster"
 application_url = "https://booster-5imz.onrender.com"
 embedded = true
