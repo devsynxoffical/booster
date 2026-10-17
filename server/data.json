@@ -69,8 +69,38 @@
       },
       "realProducts": [],
       "realOrders": [],
-      "keywords": [],
-      "articles": []
+      "keywords": [
+        {
+          "id": 1792245049104,
+          "keyword": "best affordable luxury skincare and beauty 2026",
+          "volume": 14800,
+          "difficulty": 19,
+          "intent": "Commercial",
+          "status": "Targeted"
+        },
+        {
+          "id": 1792245049105,
+          "keyword": "top rated luxury skincare and beauty online",
+          "volume": 9200,
+          "difficulty": 16,
+          "intent": "Transactional",
+          "status": "Targeted"
+        }
+      ],
+      "articles": [
+        {
+          "id": "art-1792245074267",
+          "title": "The Definitive Guide to Best Natural Anti-aging Moisturizer 2026: Top Recommendations for 2026",
+          "slug": "best-natural-anti-aging-moisturizer-2026",
+          "targetKeyword": "best natural anti-aging moisturizer 2026",
+          "publishedAt": "2026-10-17",
+          "status": "Published to Store",
+          "estimatedMonthlyTraffic": 1800,
+          "readingTime": "5 min read",
+          "summary": "Programmatic SEO guide targeting \"best natural anti-aging moisturizer 2026\" with rich schema and internal product recommendations for \"Hydrating Glow Serum\".",
+          "content": "\n# The Definitive Guide to Best Natural Anti-aging Moisturizer 2026: Top Recommendations for 2026\n\nLooking for verified quality in best natural anti-aging moisturizer 2026? In 2026, buyers prioritize verified formulations, dermatologist testing, and reliable results.\n\n## Why best natural anti-aging moisturizer 2026 Is Trending\nShoppers are looking for products that combine gentle ingredients with proven results.\n\n### Key Buyer Checklist:\n1. Certified formulations and ingredient transparency\n2. Verified reviews from authentic buyers\n3. Free express delivery and transparent return guarantees\n\n## Top Pick: Hydrating Glow Serum\nAvailable at USA BEAUTY STORE. Handcrafted with premium ingredients and 5-star customer feedback.\n      "
+        }
+      ]
     }
   ]
 }

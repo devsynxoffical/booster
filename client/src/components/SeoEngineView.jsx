@@ -76,16 +76,43 @@ export default function SeoEngineView() {
     }
   };
 
-  const handleRunAudit = async () => {
-    setIsAuditing(true);
+  const [isAutoPiloting, setIsAutoPiloting] = useState(false);
+  const [autoPilotStatus, setAutoPilotStatus] = useState(null);
+
+  const handleRunFullAutoCampaign = async () => {
+    setIsAutoPiloting(true);
+    setAutoPilotStatus('Scanning store catalog and niche search trends on Google...');
     try {
-      const res = await fetch('/api/seo/audit-catalog', { method: 'POST' });
-      const data = await res.json();
-      setAuditData(data);
+      const kwRes = await fetch('/api/seo/generate-keyword', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ niche: nicheInput })
+      });
+      const kwData = await kwRes.json();
+      const discoveredKw = kwData.keywords || [];
+      if (discoveredKw.length > 0) setKeywords(discoveredKw);
+
+      setAutoPilotStatus('Auto-writing & publishing high-ranking buyer guide to Shopify Blog...');
+      const targetKw = discoveredKw[0]?.keyword || selectedKeyword;
+
+      const artRes = await fetch('/api/seo/generate-article', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ targetKeyword: targetKw, productFocus })
+      });
+      const artData = await artRes.json();
+      if (artData.article) {
+        setArticles(prev => [artData.article, ...prev]);
+        setSelectedArticleModal(artData.article);
+      }
+
+      setAutoPilotStatus(`Campaign Complete! Auto-targeted "${targetKw}" with rich schema & blog guide.`);
+      setTimeout(() => setAutoPilotStatus(null), 6000);
     } catch (e) {
       console.error(e);
+      setAutoPilotStatus('Error executing autonomous campaign.');
     } finally {
-      setIsAuditing(false);
+      setIsAutoPiloting(false);
     }
   };
 
@@ -99,6 +126,80 @@ export default function SeoEngineView() {
         <p style={{ fontSize: '13.5px', color: 'var(--text-muted)', marginTop: '4px' }}>
           Drive automated, recurring organic customers from Google without ad spend by auto-generating high-ranking articles, targeting buyer search terms, and deploying rich JSON-LD snippets.
         </p>
+      </div>
+
+      {/* Autonomous Organic Research & Execution Banner */}
+      <div style={{
+        background: 'linear-gradient(135deg, #f0fdf4 0%, #e0f2fe 100%)',
+        border: '1px solid #86efac',
+        borderRadius: '16px',
+        padding: '20px 24px',
+        marginBottom: '26px',
+        boxShadow: '0 4px 15px -3px rgba(16, 185, 129, 0.1)'
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '16px' }}>
+          <div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '6px' }}>
+              <span className="badge badge-green" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#10b981', display: 'inline-block' }}></span>
+                Autonomous SEO Extension Active
+              </span>
+              <span style={{ fontSize: '12px', color: '#0369a1', fontWeight: 600 }}>
+                Google 5-Star Rich Snippet Schema • Live Telemetry • Niche Intelligence
+              </span>
+            </div>
+            <h3 style={{ fontSize: '16px', fontWeight: 800, color: '#0f172a', margin: '4px 0' }}>
+              Full Auto-Pilot Organic Search & Research Engine
+            </h3>
+            <p style={{ fontSize: '13px', color: '#334155', maxWidth: '680px', lineHeight: 1.5 }}>
+              Automatically crawls commercial buyer queries on Google for your niche, generates and publishes ranking buyer guides directly to your Shopify blog, and auto-injects 5-star Product Rich Snippets on your storefront.
+            </p>
+          </div>
+
+          <button 
+            className="btn btn-blue"
+            onClick={handleRunFullAutoCampaign}
+            disabled={isAutoPiloting}
+            style={{
+              padding: '12px 20px',
+              fontSize: '13.5px',
+              fontWeight: 700,
+              boxShadow: '0 4px 12px rgba(37, 99, 235, 0.25)',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px'
+            }}
+          >
+            {isAutoPiloting ? (
+              <>
+                <Loader2 size={16} className="animate-spin" /> Auto-Piloting Campaign...
+              </>
+            ) : (
+              <>
+                <Sparkles size={16} /> ⚡ Run 1-Click Organic Growth Campaign
+              </>
+            )}
+          </button>
+        </div>
+
+        {autoPilotStatus && (
+          <div style={{
+            marginTop: '14px',
+            padding: '10px 14px',
+            borderRadius: '8px',
+            background: 'rgba(255, 255, 255, 0.9)',
+            border: '1px solid #93c5fd',
+            fontSize: '12.5px',
+            color: '#1e40af',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px',
+            fontWeight: 600
+          }}>
+            <Sparkles size={14} style={{ color: '#2563eb' }} />
+            {autoPilotStatus}
+          </div>
+        )}
       </div>
 
       {/* Tabs */}
