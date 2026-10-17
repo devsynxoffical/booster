@@ -14,7 +14,7 @@ import {
   Loader2
 } from 'lucide-react';
 
-export default function SeoEngineView() {
+export default function SeoEngineView({ isMerchantMode }) {
   const [keywords, setKeywords] = useState([]);
   const [articles, setArticles] = useState([]);
   const [nicheInput, setNicheInput] = useState('minimalist lifestyle & ergonomics');
@@ -128,79 +128,81 @@ export default function SeoEngineView() {
         </p>
       </div>
 
-      {/* Autonomous Organic Research & Execution Banner */}
-      <div style={{
-        background: 'linear-gradient(135deg, #f0fdf4 0%, #e0f2fe 100%)',
-        border: '1px solid #86efac',
-        borderRadius: '16px',
-        padding: '20px 24px',
-        marginBottom: '26px',
-        boxShadow: '0 4px 15px -3px rgba(16, 185, 129, 0.1)'
-      }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '16px' }}>
-          <div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '6px' }}>
-              <span className="badge badge-green" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#10b981', display: 'inline-block' }}></span>
-                Autonomous SEO Extension Active
-              </span>
-              <span style={{ fontSize: '12px', color: '#0369a1', fontWeight: 600 }}>
-                Google 5-Star Rich Snippet Schema • Live Telemetry • Niche Intelligence
-              </span>
+      {/* Autonomous Organic Research & Execution Banner (Super Admin Only) */}
+      {!isMerchantMode && (
+        <div style={{
+          background: 'linear-gradient(135deg, #f0fdf4 0%, #e0f2fe 100%)',
+          border: '1px solid #86efac',
+          borderRadius: '16px',
+          padding: '20px 24px',
+          marginBottom: '26px',
+          boxShadow: '0 4px 15px -3px rgba(16, 185, 129, 0.1)'
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '16px' }}>
+            <div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '6px' }}>
+                <span className="badge badge-green" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#10b981', display: 'inline-block' }}></span>
+                  Autonomous SEO Extension Active
+                </span>
+                <span style={{ fontSize: '12px', color: '#0369a1', fontWeight: 600 }}>
+                  Google 5-Star Rich Snippet Schema • Live Telemetry • Niche Intelligence
+                </span>
+              </div>
+              <h3 style={{ fontSize: '16px', fontWeight: 800, color: '#0f172a', margin: '4px 0' }}>
+                Full Auto-Pilot Organic Search & Research Engine
+              </h3>
+              <p style={{ fontSize: '13px', color: '#334155', maxWidth: '680px', lineHeight: 1.5 }}>
+                Automatically crawls commercial buyer queries on Google for your niche, generates and publishes ranking buyer guides directly to your Shopify blog, and auto-injects 5-star Product Rich Snippets on your storefront.
+              </p>
             </div>
-            <h3 style={{ fontSize: '16px', fontWeight: 800, color: '#0f172a', margin: '4px 0' }}>
-              Full Auto-Pilot Organic Search & Research Engine
-            </h3>
-            <p style={{ fontSize: '13px', color: '#334155', maxWidth: '680px', lineHeight: 1.5 }}>
-              Automatically crawls commercial buyer queries on Google for your niche, generates and publishes ranking buyer guides directly to your Shopify blog, and auto-injects 5-star Product Rich Snippets on your storefront.
-            </p>
+
+            <button 
+              className="btn btn-blue"
+              onClick={handleRunFullAutoCampaign}
+              disabled={isAutoPiloting}
+              style={{
+                padding: '12px 20px',
+                fontSize: '13.5px',
+                fontWeight: 700,
+                boxShadow: '0 4px 12px rgba(37, 99, 235, 0.25)',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px'
+              }}
+            >
+              {isAutoPiloting ? (
+                <>
+                  <Loader2 size={16} className="animate-spin" /> Auto-Piloting Campaign...
+                </>
+              ) : (
+                <>
+                  <Sparkles size={16} /> ⚡ Run 1-Click Organic Growth Campaign
+                </>
+              )}
+            </button>
           </div>
 
-          <button 
-            className="btn btn-blue"
-            onClick={handleRunFullAutoCampaign}
-            disabled={isAutoPiloting}
-            style={{
-              padding: '12px 20px',
-              fontSize: '13.5px',
-              fontWeight: 700,
-              boxShadow: '0 4px 12px rgba(37, 99, 235, 0.25)',
+          {autoPilotStatus && (
+            <div style={{
+              marginTop: '14px',
+              padding: '10px 14px',
+              borderRadius: '8px',
+              background: 'rgba(255, 255, 255, 0.9)',
+              border: '1px solid #93c5fd',
+              fontSize: '12.5px',
+              color: '#1e40af',
               display: 'flex',
               alignItems: 'center',
-              gap: '8px'
-            }}
-          >
-            {isAutoPiloting ? (
-              <>
-                <Loader2 size={16} className="animate-spin" /> Auto-Piloting Campaign...
-              </>
-            ) : (
-              <>
-                <Sparkles size={16} /> ⚡ Run 1-Click Organic Growth Campaign
-              </>
-            )}
-          </button>
+              gap: '8px',
+              fontWeight: 600
+            }}>
+              <Sparkles size={14} style={{ color: '#2563eb' }} />
+              {autoPilotStatus}
+            </div>
+          )}
         </div>
-
-        {autoPilotStatus && (
-          <div style={{
-            marginTop: '14px',
-            padding: '10px 14px',
-            borderRadius: '8px',
-            background: 'rgba(255, 255, 255, 0.9)',
-            border: '1px solid #93c5fd',
-            fontSize: '12.5px',
-            color: '#1e40af',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '8px',
-            fontWeight: 600
-          }}>
-            <Sparkles size={14} style={{ color: '#2563eb' }} />
-            {autoPilotStatus}
-          </div>
-        )}
-      </div>
+      )}
 
       {/* Tabs */}
       <div style={{ display: 'flex', gap: '8px', borderBottom: '1px solid var(--border)', marginBottom: '24px' }}>

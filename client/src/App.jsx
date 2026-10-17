@@ -603,7 +603,7 @@ export default function App() {
           )}
 
           {currentView === 'seo' && (
-            <SeoEngineView />
+            <SeoEngineView isMerchantMode={isMerchantMode} />
           )}
 
           {currentView === 'widgets' && (
