@@ -2,7 +2,7 @@
 client_id = "booster_growth_app_client"
 name = "Shopify Growth & Organic Sales Booster"
 handle = "shopify-growth-booster"
-application_url = "http://localhost:3005"
+application_url = "https://booster-5imz.onrender.com"
 embedded = true
 
 [build]
@@ -15,8 +15,8 @@ scopes = "read_products,write_products,read_content,write_content,read_themes,wr
 
 [auth]
 redirect_urls = [
-  "http://localhost:3005/auth/callback",
-  "http://localhost:3005/auth/shopify/callback"
+  "https://booster-5imz.onrender.com/auth/callback",
+  "https://booster-5imz.onrender.com/auth/shopify/callback"
 ]
 
 [webhooks]
