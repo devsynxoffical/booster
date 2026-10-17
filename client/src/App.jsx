@@ -13,7 +13,10 @@ import {
   Plus, 
   Store, 
   Layers,
-  ChevronDown
+  ChevronDown,
+  Lock,
+  LogOut,
+  ShieldAlert
 } from 'lucide-react';
 
 import DashboardView from './components/DashboardView.jsx';
@@ -29,6 +32,14 @@ export default function App() {
   const [isConnectModalOpen, setIsConnectModalOpen] = useState(false);
   const [storesData, setStoresData] = useState({ activeStoreId: null, stores: [], appConfig: {} });
   const [activeStore, setActiveStore] = useState(null);
+
+  // Admin Master Password State
+  const [isAdminLoggedIn, setIsAdminLoggedIn] = useState(() => {
+    return sessionStorage.getItem('devsynx_admin_auth') === 'true';
+  });
+  const [adminPasswordInput, setAdminPasswordInput] = useState('');
+  const [loginError, setLoginError] = useState('');
+  const [isLoggingIn, setIsLoggingIn] = useState(false);
 
   const [stats, setStats] = useState({
     totalVisitors: 0,
@@ -143,6 +154,36 @@ export default function App() {
     }
   };
 
+  const handleAdminLogin = async (e) => {
+    e.preventDefault();
+    setIsLoggingIn(true);
+    setLoginError('');
+    try {
+      const res = await fetch('/api/admin/verify-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password: adminPasswordInput })
+      });
+      const data = await res.json();
+      if (data.success) {
+        sessionStorage.setItem('devsynx_admin_auth', 'true');
+        setIsAdminLoggedIn(true);
+        refreshAllData();
+      } else {
+        setLoginError(data.error || 'Incorrect admin password');
+      }
+    } catch {
+      setLoginError('Could not verify password with server');
+    } finally {
+      setIsLoggingIn(false);
+    }
+  };
+
+  const handleAdminLogout = () => {
+    sessionStorage.removeItem('devsynx_admin_auth');
+    setIsAdminLoggedIn(false);
+  };
+
   const getBreadcrumbTitle = () => {
     switch(currentView) {
       case 'dashboard': return 'Dashboard';
@@ -167,6 +208,103 @@ export default function App() {
 
   const currentStoreDisplayName = activeStore?.storeName || (getUrlShop() ? 'USA BEAUTY STORE' : 'Devsynx Admin');
   const storeInitials = currentStoreDisplayName.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
+
+  // Super Admin Password Gate (Only shown to agency admins on public website, never to clients inside Shopify)
+  if (!isMerchantMode && !isAdminLoggedIn) {
+    return (
+      <div style={{
+        minHeight: '100vh',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        background: '#f8fafc',
+        padding: '20px',
+        fontFamily: "'Inter', sans-serif"
+      }}>
+        <div style={{
+          width: '100%',
+          maxWidth: '430px',
+          background: '#ffffff',
+          borderRadius: '16px',
+          border: '1px solid #e2e8f0',
+          boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.01)',
+          padding: '40px 32px'
+        }}>
+          <div style={{ textAlign: 'center', marginBottom: '28px' }}>
+            <div style={{
+              width: '56px',
+              height: '56px',
+              borderRadius: '14px',
+              background: '#2563eb',
+              color: '#ffffff',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              margin: '0 auto 16px auto',
+              boxShadow: '0 4px 14px rgba(37, 99, 235, 0.25)'
+            }}>
+              <Lock size={26} />
+            </div>
+            <h2 style={{ fontSize: '20px', fontWeight: 800, color: '#0f172a', marginBottom: '6px' }}>
+              DEVSYNX Master Admin
+            </h2>
+            <p style={{ fontSize: '13px', color: '#64748b', lineHeight: 1.5 }}>
+              Enter your master password to access multi-store management, client analytics, and API keys.
+            </p>
+          </div>
+
+          {loginError && (
+            <div style={{
+              padding: '10px 14px',
+              borderRadius: '8px',
+              background: '#fef2f2',
+              border: '1px solid #fecaca',
+              color: '#991b1b',
+              fontSize: '12.5px',
+              marginBottom: '18px',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px'
+            }}>
+              <ShieldAlert size={16} />
+              <span>{loginError}</span>
+            </div>
+          )}
+
+          <form onSubmit={handleAdminLogin}>
+            <div className="form-group" style={{ marginBottom: '20px' }}>
+              <label className="form-label" style={{ fontSize: '12.5px', fontWeight: 600 }}>Master Password</label>
+              <input 
+                type="password"
+                className="form-input"
+                placeholder="Enter admin password (default: devsynx2026)"
+                value={adminPasswordInput}
+                onChange={(e) => setAdminPasswordInput(e.target.value)}
+                autoFocus
+                required
+                style={{ padding: '10px 14px', fontSize: '14px' }}
+              />
+            </div>
+
+            <button 
+              type="submit" 
+              className="btn btn-blue" 
+              disabled={isLoggingIn}
+              style={{ width: '100%', padding: '11px', fontSize: '14px', fontWeight: 600, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}
+            >
+              {isLoggingIn ? 'Verifying...' : 'Unlock Admin Panel'}
+            </button>
+          </form>
+
+          <div style={{ marginTop: '24px', paddingTop: '18px', borderTop: '1px solid #f1f5f9', textAlign: 'center' }}>
+            <span style={{ fontSize: '11.5px', color: '#94a3b8' }}>
+              Protected by Devsynx Security · Multi-Store Architecture
+            </span>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="app-container">
@@ -394,6 +532,15 @@ export default function App() {
                   style={{ fontSize: '12px', padding: '6px 12px' }}
                 >
                   <Plus size={14} /> Add / Switch Store
+                </button>
+
+                <button 
+                  className="btn btn-white"
+                  onClick={handleAdminLogout}
+                  title="Lock Admin Panel"
+                  style={{ fontSize: '12px', padding: '6px 11px', display: 'flex', alignItems: 'center', gap: '5px' }}
+                >
+                  <LogOut size={13} /> Lock
                 </button>
               </>
             )}

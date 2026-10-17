@@ -298,13 +298,40 @@ async function startServer() {
     }
   });
 
+  // Super Admin Password Protection Endpoints
+  app.post('/api/admin/verify-password', (req, res) => {
+    const { password } = req.body;
+    const data = loadData();
+    const correctPassword = data.appConfig?.adminPassword || process.env.ADMIN_PASSWORD || 'devsynx2026';
+    if (password === correctPassword) {
+      return res.json({ success: true, token: 'devsynx_admin_authenticated' });
+    }
+    return res.status(401).json({ success: false, error: 'Incorrect master admin password' });
+  });
+
+  app.post('/api/admin/change-password', (req, res) => {
+    const { currentPassword, newPassword } = req.body;
+    const data = loadData();
+    const correctPassword = data.appConfig?.adminPassword || process.env.ADMIN_PASSWORD || 'devsynx2026';
+    if (currentPassword !== correctPassword) {
+      return res.status(401).json({ success: false, error: 'Current password incorrect' });
+    }
+    if (!newPassword || newPassword.length < 4) {
+      return res.status(400).json({ success: false, error: 'Password must be at least 4 characters' });
+    }
+    data.appConfig.adminPassword = newPassword;
+    saveData(data);
+    res.json({ success: true, message: 'Admin password updated successfully!' });
+  });
+
   // Update App Credentials directly from Admin Panel (No .env needed!)
   app.post('/api/stores/app-config', (req, res) => {
-    const { clientId, clientSecret, publicAppUrl } = req.body;
+    const { clientId, clientSecret, publicAppUrl, adminPassword } = req.body;
     const data = loadData();
     if (clientId) data.appConfig.clientId = clientId.trim();
     if (clientSecret) data.appConfig.clientSecret = clientSecret.trim();
     if (publicAppUrl) data.appConfig.publicAppUrl = publicAppUrl.trim();
+    if (adminPassword) data.appConfig.adminPassword = adminPassword.trim();
     saveData(data);
     res.json({ success: true, appConfig: data.appConfig });
   });
