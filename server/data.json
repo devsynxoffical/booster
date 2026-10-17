@@ -1,57 +1,76 @@
 {
-  "connection": {
-    "isConnected": false,
-    "shopDomain": "",
-    "accessToken": "",
-    "publicAppUrl": "http://localhost:3005",
-    "storeDetails": {
-      "name": "Connect Live Shopify Store",
+  "appConfig": {
+    "clientId": "4d64bd85effdc3825141e559a7c7b890",
+    "clientSecret": "",
+    "scopes": "read_products,write_products,read_content,write_content,read_orders,read_script_tags,write_script_tags",
+    "publicAppUrl": "https://booster-5imz.onrender.com",
+    "adminPassword": "devsynx2026"
+  },
+  "activeStoreId": "chandkali",
+  "stores": [
+    {
+      "id": "chandkali",
+      "shopDomain": "chandkali.myshopify.com",
+      "customDomain": "usabeautystore.com",
+      "storeName": "USA BEAUTY STORE",
       "email": "",
       "currency": "USD",
       "currencySymbol": "$",
-      "domain": ""
+      "accessToken": "",
+      "connectedAt": "2026-10-17T12:00:00.000Z",
+      "isActive": true,
+      "settings": {
+        "storeName": "USA BEAUTY STORE",
+        "storeUrl": "https://usabeautystore.com",
+        "enableBooster": true,
+        "enablePopups": true,
+        "popupPosition": "bottom-left",
+        "popupDelay": 6,
+        "popupDuration": 5,
+        "enableVisitorCounter": true,
+        "minVisitors": 12,
+        "maxVisitors": 36,
+        "enableFreeShipping": true,
+        "freeShippingThreshold": 50,
+        "shippingCurrency": "$",
+        "enableCountdown": true,
+        "countdownMinutes": 15,
+        "enableSeoSchema": true,
+        "enableAutoIndexing": true,
+        "accentColor": "#2563eb",
+        "themeMode": "light",
+        "useRealOrdersOnly": true
+      },
+      "stats": {
+        "totalVisitors": 1,
+        "pageViews": 2,
+        "uniqueVisitors": 1,
+        "bounceRate": 0,
+        "organicVisitors": 1,
+        "organicSharePercent": 100,
+        "conversionRate": 0,
+        "conversionUpliftPercent": 0,
+        "totalOrdersBoosted": 0,
+        "revenueGenerated": 0,
+        "popupImpressions": 0,
+        "popupClicks": 0,
+        "regions": {
+          "PK": 1
+        },
+        "recentEvents": [
+          {
+            "id": 1792241877971,
+            "type": "organic_visit",
+            "source": "Google Organic",
+            "keyword": "/",
+            "time": "Active"
+          }
+        ]
+      },
+      "realProducts": [],
+      "realOrders": [],
+      "keywords": [],
+      "articles": []
     }
-  },
-  "settings": {
-    "storeName": "My Shopify Store",
-    "storeUrl": "",
-    "enableBooster": true,
-    "enablePopups": true,
-    "popupPosition": "bottom-left",
-    "popupDelay": 6,
-    "popupDuration": 5,
-    "enableVisitorCounter": true,
-    "minVisitors": 12,
-    "maxVisitors": 36,
-    "enableFreeShipping": true,
-    "freeShippingThreshold": 50,
-    "shippingCurrency": "$",
-    "enableCountdown": true,
-    "countdownMinutes": 15,
-    "enableSeoSchema": true,
-    "enableAutoIndexing": true,
-    "accentColor": "#2563eb",
-    "themeMode": "light",
-    "useRealOrdersOnly": true
-  },
-  "stats": {
-    "totalVisitors": 0,
-    "pageViews": 0,
-    "uniqueVisitors": 0,
-    "bounceRate": 0,
-    "organicVisitors": 0,
-    "organicSharePercent": 0,
-    "conversionRate": 0,
-    "conversionUpliftPercent": 0,
-    "totalOrdersBoosted": 0,
-    "revenueGenerated": 0,
-    "popupImpressions": 0,
-    "popupClicks": 0,
-    "regions": {},
-    "recentEvents": []
-  },
-  "realProducts": [],
-  "realOrders": [],
-  "keywords": [],
-  "articles": []
+  ]
 }
