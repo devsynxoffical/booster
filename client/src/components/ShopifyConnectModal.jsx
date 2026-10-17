@@ -21,7 +21,8 @@ import {
 
 export default function ShopifyConnectModal({ isOpen, onClose, onStoreChanged }) {
   const [storesData, setStoresData] = useState({ activeStoreId: null, stores: [], appConfig: {} });
-  const [activeTab, setActiveTab] = useState('oauth'); // 'oauth' | 'manual' | 'manage' | 'keys'
+  const [activeTab, setActiveTab] = useState('manage'); // 'manage' | 'manual' | 'oauth' | 'keys'
+  const [storeNameInput, setStoreNameInput] = useState('');
   const [shopDomain, setShopDomain] = useState('');
   const [accessToken, setAccessToken] = useState('');
   const [oauthShopInput, setOauthShopInput] = useState('chandkali.myshopify.com');
@@ -54,6 +55,7 @@ export default function ShopifyConnectModal({ isOpen, onClose, onStoreChanged })
     if (isOpen) {
       fetchStores();
       setStatusMsg(null);
+      setActiveTab('manage');
     }
   }, [isOpen]);
 
@@ -105,11 +107,11 @@ export default function ShopifyConnectModal({ isOpen, onClose, onStoreChanged })
     setTimeout(() => setCopied(false), 2000);
   };
 
-  // Direct manual connect via Admin API token
+  // Direct manual connect or quick-add for any store
   const handleManualConnect = async (e) => {
     e.preventDefault();
-    if (!shopDomain || !accessToken) {
-      setStatusMsg({ type: 'error', text: 'Please enter both shop domain and access token.' });
+    if (!shopDomain) {
+      setStatusMsg({ type: 'error', text: 'Please enter the Shopify store domain.' });
       return;
     }
 
@@ -120,16 +122,22 @@ export default function ShopifyConnectModal({ isOpen, onClose, onStoreChanged })
       const res = await fetch('/api/stores/connect-manual', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ shopDomain, accessToken })
+        body: JSON.stringify({ 
+          shopDomain, 
+          storeName: storeNameInput,
+          accessToken: accessToken ? accessToken.trim() : '' 
+        })
       });
       const data = await res.json();
 
       if (data.success) {
-        setStatusMsg({ type: 'success', text: `Store "${data.store.storeName}" connected successfully!` });
+        setStatusMsg({ type: 'success', text: data.message || `Store "${data.store.storeName}" connected successfully!` });
         setShopDomain('');
+        setStoreNameInput('');
         setAccessToken('');
         fetchStores();
         onStoreChanged();
+        setActiveTab('manage'); // Show in connected stores list!
       } else {
         setStatusMsg({ type: 'error', text: data.error || 'Failed to connect store.' });
       }
@@ -151,6 +159,7 @@ export default function ShopifyConnectModal({ isOpen, onClose, onStoreChanged })
       });
       fetchStores();
       onStoreChanged();
+      onClose(); // Automatically close modal and load dashboard for that store!
     } catch (e) {
       console.error(e);
     } finally {
@@ -238,20 +247,20 @@ export default function ShopifyConnectModal({ isOpen, onClose, onStoreChanged })
         {/* Navigation Tabs */}
         <div style={{ display: 'flex', borderBottom: '1px solid #e2e8f0', background: '#f8fafc', padding: '0 24px', overflowX: 'auto' }}>
           <button
-            onClick={() => setActiveTab('oauth')}
+            onClick={() => setActiveTab('manage')}
             style={{
               padding: '12px 16px',
               background: 'transparent',
               border: 'none',
-              borderBottom: activeTab === 'oauth' ? '2px solid #2563eb' : '2px solid transparent',
-              color: activeTab === 'oauth' ? '#2563eb' : '#64748b',
-              fontWeight: activeTab === 'oauth' ? 700 : 500,
+              borderBottom: activeTab === 'manage' ? '2px solid #2563eb' : '2px solid transparent',
+              color: activeTab === 'manage' ? '#2563eb' : '#64748b',
+              fontWeight: activeTab === 'manage' ? 700 : 500,
               fontSize: '13px',
               cursor: 'pointer',
               whiteSpace: 'nowrap'
             }}
           >
-            ⚡ 1-Click Install Store
+            🏬 Switch Store ({storesData.stores?.length || 0})
           </button>
 
           <button
@@ -268,24 +277,24 @@ export default function ShopifyConnectModal({ isOpen, onClose, onStoreChanged })
               whiteSpace: 'nowrap'
             }}
           >
-            🔑 Store Access Token
+            ➕ Add Store
           </button>
 
           <button
-            onClick={() => setActiveTab('manage')}
+            onClick={() => setActiveTab('oauth')}
             style={{
               padding: '12px 16px',
               background: 'transparent',
               border: 'none',
-              borderBottom: activeTab === 'manage' ? '2px solid #2563eb' : '2px solid transparent',
-              color: activeTab === 'manage' ? '#2563eb' : '#64748b',
-              fontWeight: activeTab === 'manage' ? 700 : 500,
+              borderBottom: activeTab === 'oauth' ? '2px solid #2563eb' : '2px solid transparent',
+              color: activeTab === 'oauth' ? '#2563eb' : '#64748b',
+              fontWeight: activeTab === 'oauth' ? 700 : 500,
               fontSize: '13px',
               cursor: 'pointer',
               whiteSpace: 'nowrap'
             }}
           >
-            🏬 Connected Stores ({storesData.stores?.length || 0})
+            ⚡ 1-Click Install Link
           </button>
 
           <button
@@ -403,45 +412,58 @@ export default function ShopifyConnectModal({ isOpen, onClose, onStoreChanged })
             </div>
           )}
 
-          {/* TAB 2: Direct Store Access Token */}
+          {/* TAB: Add Store */}
           {activeTab === 'manual' && (
             <form onSubmit={handleManualConnect}>
               <div style={{ marginBottom: '16px' }}>
                 <h4 style={{ fontSize: '14.5px', fontWeight: 700, color: '#0f172a' }}>
-                  Connect Store via Admin API Token
+                  Add a New Shopify Store
                 </h4>
                 <p style={{ fontSize: '13px', color: '#64748b', marginTop: '4px' }}>
-                  Paste the customer's store domain and token to connect directly without OAuth.
+                  Connect any customer store in seconds. Once added, you can switch to it anytime and monitor its live visitors and conversion popups.
                 </p>
               </div>
 
-              <div className="form-group">
-                <label className="form-label">Shopify Store Domain (.myshopify.com)</label>
+              <div className="form-group" style={{ marginBottom: '14px' }}>
+                <label className="form-label" style={{ fontSize: '12.5px', fontWeight: 600 }}>Store Brand Name (Display Name)</label>
                 <input 
                   type="text" 
                   className="form-input" 
-                  placeholder="e.g. chandkali.myshopify.com"
+                  placeholder="e.g. USA Beauty Store, Fashion Brand, etc."
+                  value={storeNameInput}
+                  onChange={(e) => setStoreNameInput(e.target.value)}
+                />
+              </div>
+
+              <div className="form-group" style={{ marginBottom: '14px' }}>
+                <label className="form-label" style={{ fontSize: '12.5px', fontWeight: 600 }}>Shopify Store Domain (.myshopify.com) *</label>
+                <input 
+                  type="text" 
+                  className="form-input" 
+                  placeholder="e.g. storename.myshopify.com"
                   value={shopDomain}
                   onChange={(e) => setShopDomain(e.target.value)}
                   required
                 />
               </div>
 
-              <div className="form-group">
-                <label className="form-label">Admin API Access Token (shpat_...)</label>
+              <div className="form-group" style={{ marginBottom: '14px' }}>
+                <label className="form-label" style={{ fontSize: '12.5px', fontWeight: 600 }}>Admin API Access Token (Optional)</label>
                 <input 
                   type="password" 
                   className="form-input" 
-                  placeholder="shpat_xxxxxxxxxxxxxxxxxxxxxxxx"
+                  placeholder="shpat_xxxxxxxxxxxxxxxxxxxxxxxx (Optional)"
                   value={accessToken}
                   onChange={(e) => setAccessToken(e.target.value)}
-                  required
                 />
+                <p style={{ fontSize: '12px', color: '#64748b', marginTop: '4px' }}>
+                  Leave blank to connect via 1-line script tag immediately, or enter token to sync real store products & orders.
+                </p>
               </div>
 
-              <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '14px' }}>
+              <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '16px' }}>
                 <button type="submit" className="btn btn-blue" disabled={isLoading} style={{ minWidth: '160px' }}>
-                  {isLoading ? <><Loader2 size={15} className="animate-spin" /> Verifying...</> : <><Plus size={15} /> Add Store</>}
+                  {isLoading ? <><Loader2 size={15} className="animate-spin" /> Adding Store...</> : <><Plus size={15} /> Add Store</>}
                 </button>
               </div>
             </form>

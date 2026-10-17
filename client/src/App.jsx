@@ -277,7 +277,7 @@ export default function App() {
               <input 
                 type="password"
                 className="form-input"
-                placeholder="Enter admin password (default: devsynx2026)"
+                placeholder="Enter master password..."
                 value={adminPasswordInput}
                 onChange={(e) => setAdminPasswordInput(e.target.value)}
                 autoFocus

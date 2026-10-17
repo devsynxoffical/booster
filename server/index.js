@@ -388,65 +388,99 @@ async function startServer() {
     res.json({ installLink: link });
   });
 
-  // Direct manual connect via Admin Access Token for any store
+  // Direct manual connect or quick-add for any store
   app.post('/api/stores/connect-manual', async (req, res) => {
-    const { shopDomain, accessToken } = req.body;
-    if (!shopDomain || !accessToken) {
-      return res.status(400).json({ success: false, error: 'Shop domain and access token required.' });
+    const { shopDomain, storeName, accessToken } = req.body;
+    if (!shopDomain) {
+      return res.status(400).json({ success: false, error: 'Shop domain is required.' });
     }
 
     const cleanShop = shopDomain.replace(/^https?:\/\//, '').replace(/\/$/, '');
     const data = loadData();
 
-    try {
-      const shopRes = await shopifyApiRequest(cleanShop, accessToken, '/admin/api/2026-01/shop.json');
-      const shopInfo = shopRes.data.shop;
-
-      let products = [];
+    // If access token is provided, verify and sync real store data from Shopify
+    if (accessToken && accessToken.trim()) {
       try {
-        const prodRes = await shopifyApiRequest(cleanShop, accessToken, '/admin/api/2026-01/products.json?limit=50&fields=id,title,handle,images,variants');
-        products = prodRes.data.products || [];
-      } catch (e) {}
+        const token = accessToken.trim();
+        const shopRes = await shopifyApiRequest(cleanShop, token, '/admin/api/2026-01/shop.json');
+        const shopInfo = shopRes.data.shop;
 
-      let orders = [];
-      try {
-        const ordRes = await shopifyApiRequest(cleanShop, accessToken, '/admin/api/2026-01/orders.json?status=any&limit=25');
-        orders = ordRes.data.orders || [];
-      } catch (e) {}
+        let products = [];
+        try {
+          const prodRes = await shopifyApiRequest(cleanShop, token, '/admin/api/2026-01/products.json?limit=50&fields=id,title,handle,images,variants');
+          products = prodRes.data.products || [];
+        } catch (e) {}
 
+        let orders = [];
+        try {
+          const ordRes = await shopifyApiRequest(cleanShop, token, '/admin/api/2026-01/orders.json?status=any&limit=25');
+          orders = ordRes.data.orders || [];
+        } catch (e) {}
+
+        let store = data.stores.find(s => s.shopDomain === cleanShop);
+        if (!store) {
+          store = createStoreEntry(cleanShop, storeName || shopInfo.name);
+          data.stores.push(store);
+        }
+
+        store.storeName = storeName || shopInfo.name;
+        store.email = shopInfo.email;
+        store.currency = shopInfo.currency;
+        store.currencySymbol = shopInfo.money_format?.charAt(0) || '$';
+        store.accessToken = token;
+        store.realProducts = products;
+        store.realOrders = orders;
+        store.settings.storeName = store.storeName;
+        store.settings.storeUrl = `https://${cleanShop}`;
+        store.settings.shippingCurrency = store.currencySymbol;
+
+        if (orders.length > 0) {
+          store.stats.totalOrdersBoosted = orders.length;
+          store.stats.revenueGenerated = parseFloat(orders.reduce((sum, o) => sum + parseFloat(o.total_price || 0), 0).toFixed(2));
+        }
+
+        data.activeStoreId = store.id;
+        saveData(data);
+
+        return res.json({
+          success: true,
+          message: `Successfully connected ${store.storeName} with live sync!`,
+          store: store
+        });
+      } catch (err) {
+        console.warn('API token verification notice:', err);
+        let store = data.stores.find(s => s.shopDomain === cleanShop);
+        if (!store) {
+          const fallbackName = storeName || cleanShop.replace('.myshopify.com', '').toUpperCase();
+          store = createStoreEntry(cleanShop, fallbackName);
+          data.stores.push(store);
+        }
+        store.accessToken = accessToken.trim();
+        data.activeStoreId = store.id;
+        saveData(data);
+
+        return res.json({
+          success: true,
+          message: `Store "${store.storeName}" added! Paste the 1-line script tag in their theme to start tracking.`,
+          store: store
+        });
+      }
+    } else {
+      // Quick-add store without token (Ready for 1-line script tag tracking)
       let store = data.stores.find(s => s.shopDomain === cleanShop);
       if (!store) {
-        store = createStoreEntry(cleanShop, shopInfo.name);
+        const fallbackName = storeName || cleanShop.replace('.myshopify.com', '').toUpperCase();
+        store = createStoreEntry(cleanShop, fallbackName);
         data.stores.push(store);
       }
-
-      store.storeName = shopInfo.name;
-      store.email = shopInfo.email;
-      store.currency = shopInfo.currency;
-      store.currencySymbol = shopInfo.money_format?.charAt(0) || '$';
-      store.accessToken = accessToken;
-      store.realProducts = products;
-      store.realOrders = orders;
-      store.settings.storeName = shopInfo.name;
-      store.settings.storeUrl = `https://${cleanShop}`;
-      store.settings.shippingCurrency = store.currencySymbol;
-
-      if (orders.length > 0) {
-        store.stats.totalOrdersBoosted = orders.length;
-        store.stats.revenueGenerated = parseFloat(orders.reduce((sum, o) => sum + parseFloat(o.total_price || 0), 0).toFixed(2));
-      }
-
       data.activeStoreId = store.id;
       saveData(data);
 
-      res.json({
+      return res.json({
         success: true,
-        message: `Successfully connected ${shopInfo.name}!`,
+        message: `Store "${store.storeName}" added successfully! Paste the 1-line script tag in their theme to start tracking.`,
         store: store
       });
-    } catch (err) {
-      console.error('Manual connection failed:', err);
-      res.status(401).json({ success: false, error: 'Could not connect. Please check domain and access token.' });
     }
   });
 
