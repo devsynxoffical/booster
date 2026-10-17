@@ -712,7 +712,8 @@ Available at ${store.storeName}. Handcrafted with premium ingredients and 5-star
       store.stats.totalVisitors += 1;
       store.stats.pageViews += 1;
 
-      const country = req.headers['cf-ipcountry'] || req.headers['x-country-code'] || 'United States';
+      const rawCountry = req.headers['cf-ipcountry'] || req.headers['x-country-code'] || req.headers['x-vercel-ip-country'] || req.body?.country || 'US';
+      const country = String(rawCountry).trim().toUpperCase();
       store.stats.regions[country] = (store.stats.regions[country] || 0) + 1;
 
       const isOrganic = referrer && (

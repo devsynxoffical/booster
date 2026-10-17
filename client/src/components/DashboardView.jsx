@@ -34,6 +34,30 @@ export default function DashboardView({ stats, config, connection, isMerchantMod
   const regionEntries = Object.entries(stats?.regions || {});
   const totalRegionHits = regionEntries.reduce((sum, [, count]) => sum + count, 0);
 
+  const formatCountryName = (code) => {
+    if (!code) return 'Unknown';
+    const clean = String(code).trim().toUpperCase();
+    const map = {
+      'US': 'United States (US)',
+      'USA': 'United States (US)',
+      'UNITED STATES': 'United States (US)',
+      'PK': 'Pakistan (PK)',
+      'GB': 'United Kingdom (UK)',
+      'UK': 'United Kingdom (UK)',
+      'CA': 'Canada (CA)',
+      'AU': 'Australia (AU)',
+      'DE': 'Germany (DE)',
+      'FR': 'France (FR)',
+      'IT': 'Italy (IT)',
+      'ES': 'Spain (ES)',
+      'NL': 'Netherlands (NL)',
+      'AE': 'United Arab Emirates (UAE)',
+      'SA': 'Saudi Arabia (SA)',
+      'IN': 'India (IN)'
+    };
+    return map[clean] || code;
+  };
+
   const formatNumber = (num) => {
     if (!num || num === 0) return { val: '0', unit: '' };
     if (num >= 1000000) return { val: (num / 1000000).toFixed(2), unit: 'M' };
@@ -310,7 +334,7 @@ export default function DashboardView({ stats, config, connection, isMerchantMod
                 <div key={regionName} className="region-item">
                   <div className="region-label-wrap">
                     <span className="region-dot" style={{ background: color }}></span>
-                    <span>{regionName}</span>
+                    <span style={{ fontWeight: 600 }}>{formatCountryName(regionName)}</span>
                   </div>
                   <div className="region-value-wrap">
                     <div className="region-value">{count}</div>
