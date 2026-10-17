@@ -528,8 +528,9 @@ export default function DashboardView({ stats, config, connection, isMerchantMod
             <div className="report-tag">Real Visitor Geography</div>
             <div className="report-title">Live Store Traffic by Region</div>
           </div>
-          <div className="report-link" onClick={() => onNavigate('simulator')}>
-            Test in Live Simulator <ArrowRight size={14} />
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', color: '#10b981', fontWeight: 600 }}>
+            <span style={{ width: '7px', height: '7px', background: '#10b981', borderRadius: '50%', display: 'inline-block' }}></span>
+            Real-Time Telemetry
           </div>
         </div>
 
@@ -631,7 +632,7 @@ export default function DashboardView({ stats, config, connection, isMerchantMod
           </div>
         ) : (
           <div style={{ padding: '24px', textAlign: 'center', color: '#94a3b8', fontSize: '13px' }}>
-            No customer events recorded yet. Browse your store with the booster enabled or test with the Storefront Simulator.
+            No customer events recorded yet. Live customer visits and browsing activity will appear here in real time.
           </div>
         )}
       </div>

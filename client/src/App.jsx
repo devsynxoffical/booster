@@ -25,7 +25,6 @@ import DashboardView from './components/DashboardView.jsx';
 import SeoEngineView from './components/SeoEngineView.jsx';
 import WidgetsConfigView from './components/WidgetsConfigView.jsx';
 import SocialSyndicationView from './components/SocialSyndicationView.jsx';
-import StorefrontSimulatorView from './components/StorefrontSimulatorView.jsx';
 import SetupGuideView from './components/SetupGuideView.jsx';
 import ShopifyConnectModal from './components/ShopifyConnectModal.jsx';
 
@@ -208,7 +207,6 @@ export default function App() {
       case 'seo': return 'Programmatic SEO';
       case 'widgets': return 'Conversion Widgets';
       case 'social': return 'Social Syndication';
-      case 'simulator': return 'Storefront Simulator';
       case 'guide': return 'Go Live Guide';
       default: return 'Dashboard';
     }
@@ -457,25 +455,17 @@ export default function App() {
             <span>Social Syndication</span>
           </div>
 
-          <div className="nav-section-title">Components</div>
-
-          <div 
-            className={`nav-item ${currentView === 'simulator' ? 'active' : ''}`}
-            onClick={() => { setCurrentView('simulator'); setIsMobileSidebarOpen(false); }}
-          >
-            <BarChart2 size={16} className="nav-icon" />
-            <span>Store Simulator</span>
-            <span className="nav-badge-green">TEST</span>
-          </div>
-
           {!isMerchantMode && (
-            <div 
-              className={`nav-item ${currentView === 'guide' ? 'active' : ''}`}
-              onClick={() => { setCurrentView('guide'); setIsMobileSidebarOpen(false); }}
-            >
-              <BookOpen size={16} className="nav-icon" />
-              <span>Go Live Guide</span>
-            </div>
+            <>
+              <div className="nav-section-title">Documentation</div>
+              <div 
+                className={`nav-item ${currentView === 'guide' ? 'active' : ''}`}
+                onClick={() => { setCurrentView('guide'); setIsMobileSidebarOpen(false); }}
+              >
+                <BookOpen size={16} className="nav-icon" />
+                <span>Go Live Guide</span>
+              </div>
+            </>
           )}
         </nav>
 
@@ -631,12 +621,6 @@ export default function App() {
 
           {currentView === 'social' && (
             <SocialSyndicationView />
-          )}
-
-          {currentView === 'simulator' && (
-            <StorefrontSimulatorView 
-              config={config} 
-            />
           )}
 
           {currentView === 'guide' && (
