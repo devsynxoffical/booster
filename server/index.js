@@ -136,8 +136,20 @@ async function startServer() {
 
     if (shopQuery) {
       const clean = shopQuery.replace(/^https?:\/\//, '').replace(/\/$/, '');
-      const match = data.stores.find(s => s.shopDomain === clean || s.shopDomain.includes(clean));
-      if (match) return match;
+      let match = data.stores.find(s => s.shopDomain === clean || s.shopDomain.includes(clean) || (s.customDomain && clean.includes(s.customDomain)));
+      if (!match) {
+        const friendlyName = (clean.includes('chandkali') || clean.includes('usabeauty')) 
+          ? 'USA BEAUTY STORE' 
+          : clean.replace('.myshopify.com', '').replace(/[-_.]/g, ' ').toUpperCase();
+        match = createStoreEntry(clean, friendlyName);
+        if (clean.includes('chandkali') || clean.includes('usabeauty')) {
+          match.customDomain = 'usabeautystore.com';
+        }
+        data.stores.push(match);
+        data.activeStoreId = match.id;
+        saveData(data);
+      }
+      return match;
     }
 
     // Try extracting from referer / origin header (for storefront scripts)
@@ -147,6 +159,17 @@ async function startServer() {
         if (referer.includes(store.shopDomain) || (store.customDomain && referer.includes(store.customDomain))) {
           return store;
         }
+      }
+      if (referer.includes('chandkali') || referer.includes('usabeauty')) {
+        let match = data.stores.find(s => s.shopDomain === 'chandkali.myshopify.com');
+        if (!match) {
+          match = createStoreEntry('chandkali.myshopify.com', 'USA BEAUTY STORE');
+          match.customDomain = 'usabeautystore.com';
+          data.stores.push(match);
+          data.activeStoreId = match.id;
+          saveData(data);
+        }
+        return match;
       }
     }
 

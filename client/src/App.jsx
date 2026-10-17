@@ -155,9 +155,18 @@ export default function App() {
     }
   };
 
-  const storeInitials = activeStore?.storeName 
-    ? activeStore.storeName.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase()
-    : 'SA';
+  const isEmbedded = (() => {
+    try {
+      const params = new URLSearchParams(window.location.search);
+      return params.get('embedded') === '1' || window.self !== window.top;
+    } catch {
+      return false;
+    }
+  })();
+  const isMerchantMode = isEmbedded || !!getUrlShop();
+
+  const currentStoreDisplayName = activeStore?.storeName || (getUrlShop() ? 'USA BEAUTY STORE' : 'Devsynx Admin');
+  const storeInitials = currentStoreDisplayName.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
 
   return (
     <div className="app-container">
@@ -171,42 +180,68 @@ export default function App() {
             <div className="brand-title-wrap">
               <div className="brand-title">Growth Booster</div>
               <div className="brand-subtitle">
-                {storesData.stores?.length > 0 ? `${storesData.stores.length} Stores Connected` : 'Multi-Store SaaS'}
+                {isMerchantMode ? 'Conversion & SEO Engine' : (storesData.stores?.length > 0 ? `${storesData.stores.length} Stores Connected` : 'Multi-Store SaaS')}
               </div>
             </div>
           </div>
         </div>
 
-        {/* Store Selector Pill in Sidebar */}
+        {/* Store Indicator in Sidebar */}
         <div style={{ padding: '0 14px 10px 14px' }}>
-          <div 
-            onClick={() => setIsConnectModalOpen(true)}
-            style={{
-              padding: '8px 12px',
-              borderRadius: '8px',
-              background: '#f8fafc',
-              border: '1px solid #e2e8f0',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              cursor: 'pointer',
-              transition: 'all 0.15s ease'
-            }}
-          >
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', minWidth: 0 }}>
+          {isMerchantMode ? (
+            <div 
+              style={{
+                padding: '9px 12px',
+                borderRadius: '8px',
+                background: '#f0fdf4',
+                border: '1px solid #bbf7d0',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px'
+              }}
+            >
               <span style={{
                 width: '8px',
                 height: '8px',
                 borderRadius: '50%',
-                background: activeStore ? '#10b981' : '#94a3b8',
+                background: '#10b981',
+                boxShadow: '0 0 6px #10b981',
                 flexShrink: 0
               }}></span>
-              <span style={{ fontSize: '12px', fontWeight: 700, color: '#0f172a', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                {activeStore ? activeStore.storeName : '+ Connect Store'}
+              <span style={{ fontSize: '12px', fontWeight: 700, color: '#166534', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                {currentStoreDisplayName}
               </span>
             </div>
-            <ChevronsUpDown size={14} color="#64748b" style={{ flexShrink: 0 }} />
-          </div>
+          ) : (
+            <div 
+              onClick={() => setIsConnectModalOpen(true)}
+              style={{
+                padding: '8px 12px',
+                borderRadius: '8px',
+                background: '#f8fafc',
+                border: '1px solid #e2e8f0',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                cursor: 'pointer',
+                transition: 'all 0.15s ease'
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', minWidth: 0 }}>
+                <span style={{
+                  width: '8px',
+                  height: '8px',
+                  borderRadius: '50%',
+                  background: activeStore ? '#10b981' : '#94a3b8',
+                  flexShrink: 0
+                }}></span>
+                <span style={{ fontSize: '12px', fontWeight: 700, color: '#0f172a', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                  {activeStore ? activeStore.storeName : '+ Connect Store'}
+                </span>
+              </div>
+              <ChevronsUpDown size={14} color="#64748b" style={{ flexShrink: 0 }} />
+            </div>
+          )}
         </div>
 
         <nav className="nav-menu">
@@ -220,17 +255,19 @@ export default function App() {
             <span>Dashboard</span>
           </div>
 
-          <div 
-            className="nav-item"
-            onClick={() => setIsConnectModalOpen(true)}
-            style={{ cursor: 'pointer' }}
-          >
-            <Store size={16} className="nav-icon" />
-            <span>Multi-Store</span>
-            <span className="nav-badge-blue">
-              {storesData.stores?.length || 0}
-            </span>
-          </div>
+          {!isMerchantMode && (
+            <div 
+              className="nav-item"
+              onClick={() => setIsConnectModalOpen(true)}
+              style={{ cursor: 'pointer' }}
+            >
+              <Store size={16} className="nav-icon" />
+              <span>Multi-Store</span>
+              <span className="nav-badge-blue">
+                {storesData.stores?.length || 0}
+              </span>
+            </div>
+          )}
 
           <div className="nav-section-title">Traffic & Sales</div>
 
@@ -269,31 +306,33 @@ export default function App() {
             <span className="nav-badge-green">TEST</span>
           </div>
 
-          <div 
-            className={`nav-item ${currentView === 'guide' ? 'active' : ''}`}
-            onClick={() => setCurrentView('guide')}
-          >
-            <BookOpen size={16} className="nav-icon" />
-            <span>Go Live Guide</span>
-          </div>
+          {!isMerchantMode && (
+            <div 
+              className={`nav-item ${currentView === 'guide' ? 'active' : ''}`}
+              onClick={() => setCurrentView('guide')}
+            >
+              <BookOpen size={16} className="nav-icon" />
+              <span>Go Live Guide</span>
+            </div>
+          )}
         </nav>
 
         {/* Sidebar Footer User / Store Profile */}
-        <div className="sidebar-footer" onClick={() => setIsConnectModalOpen(true)} style={{ cursor: 'pointer' }}>
+        <div className="sidebar-footer" onClick={() => !isMerchantMode && setIsConnectModalOpen(true)} style={{ cursor: isMerchantMode ? 'default' : 'pointer' }}>
           <div className="user-profile">
             <div className="avatar-circle">
               {storeInitials}
             </div>
             <div className="user-info">
               <div className="user-name" style={{ maxWidth: '130px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                {activeStore?.storeName || 'Add Store'}
+                {currentStoreDisplayName}
               </div>
               <div className="user-role">
-                {activeStore ? activeStore.shopDomain : 'Click to add store'}
+                {isMerchantMode ? 'Verified Active Store' : (activeStore ? activeStore.shopDomain : 'Click to add store')}
               </div>
             </div>
           </div>
-          <ChevronsUpDown size={15} color="#94a3b8" />
+          {!isMerchantMode && <ChevronsUpDown size={15} color="#94a3b8" />}
         </div>
       </aside>
 
@@ -305,38 +344,59 @@ export default function App() {
             <span className="crumb-muted">Workspace</span>
             <span className="crumb-separator">›</span>
             <span className="crumb-active">{getBreadcrumbTitle()}</span>
-            {activeStore && (
-              <>
-                <span className="crumb-separator">›</span>
-                <span style={{ fontSize: '12px', background: '#eff6ff', color: '#2563eb', padding: '2px 8px', borderRadius: '4px', fontWeight: 600 }}>
-                  {activeStore.storeName}
-                </span>
-              </>
-            )}
+            <span className="crumb-separator">›</span>
+            <span style={{ fontSize: '12px', background: '#eff6ff', color: '#2563eb', padding: '2px 8px', borderRadius: '4px', fontWeight: 600 }}>
+              {currentStoreDisplayName}
+            </span>
           </div>
 
           <div className="top-nav-actions">
-            {/* Quick Store Switcher if multiple stores exist */}
-            {storesData.stores && storesData.stores.length > 1 && (
-              <select 
-                className="form-select"
-                style={{ width: 'auto', padding: '5px 10px', fontSize: '12px', background: '#f8fafc' }}
-                value={storesData.activeStoreId || ''}
-                onChange={(e) => handleSwitchStore(e.target.value)}
-              >
-                {storesData.stores.map(s => (
-                  <option key={s.id} value={s.id}>{s.storeName} ({s.shopDomain})</option>
-                ))}
-              </select>
-            )}
+            {isMerchantMode ? (
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                background: '#ecfdf5',
+                border: '1px solid #a7f3d0',
+                padding: '6px 14px',
+                borderRadius: '20px',
+                fontSize: '12px',
+                color: '#065f46',
+                fontWeight: 600
+              }}>
+                <span style={{
+                  width: '8px',
+                  height: '8px',
+                  borderRadius: '50%',
+                  background: '#10b981',
+                  boxShadow: '0 0 6px #10b981'
+                }}></span>
+                Booster Engine Live & Active
+              </div>
+            ) : (
+              <>
+                {storesData.stores && storesData.stores.length > 1 && (
+                  <select 
+                    className="form-select"
+                    style={{ width: 'auto', padding: '5px 10px', fontSize: '12px', background: '#f8fafc' }}
+                    value={storesData.activeStoreId || ''}
+                    onChange={(e) => handleSwitchStore(e.target.value)}
+                  >
+                    {storesData.stores.map(s => (
+                      <option key={s.id} value={s.id}>{s.storeName} ({s.shopDomain})</option>
+                    ))}
+                  </select>
+                )}
 
-            <button 
-              className="btn btn-blue"
-              onClick={() => setIsConnectModalOpen(true)}
-              style={{ fontSize: '12px', padding: '6px 12px' }}
-            >
-              <Plus size={14} /> Add / Switch Store
-            </button>
+                <button 
+                  className="btn btn-blue"
+                  onClick={() => setIsConnectModalOpen(true)}
+                  style={{ fontSize: '12px', padding: '6px 12px' }}
+                >
+                  <Plus size={14} /> Add / Switch Store
+                </button>
+              </>
+            )}
 
             <button className="nav-icon-btn" aria-label="Notifications" onClick={refreshAllData} title="Refresh Live Data">
               <Bell size={17} />
@@ -363,10 +423,11 @@ export default function App() {
             <DashboardView 
               stats={stats} 
               config={config} 
+              isMerchantMode={isMerchantMode}
               connection={{
-                isConnected: !!activeStore,
-                shopDomain: activeStore?.shopDomain || '',
-                storeDetails: { name: activeStore?.storeName || 'Add Your First Store' },
+                isConnected: !!activeStore || isMerchantMode,
+                shopDomain: activeStore?.shopDomain || (getUrlShop() || 'chandkali.myshopify.com'),
+                storeDetails: { name: currentStoreDisplayName },
                 realProductCount: activeStore?.productsCount || 0,
                 realOrderCount: activeStore?.ordersCount || 0
               }}

@@ -19,7 +19,7 @@ import {
   Radio
 } from 'lucide-react';
 
-export default function DashboardView({ stats, config, connection, onOpenConnect, onNavigate }) {
+export default function DashboardView({ stats, config, connection, isMerchantMode, onOpenConnect, onNavigate }) {
   const formattedDate = new Date().toLocaleDateString('en-US', {
     weekday: 'long',
     month: 'long',
@@ -27,7 +27,7 @@ export default function DashboardView({ stats, config, connection, onOpenConnect
     year: 'numeric'
   }).toUpperCase().replace(/,/g, ' ·');
 
-  const merchantName = connection?.storeDetails?.name || config?.storeName || 'Store Admin';
+  const merchantName = connection?.storeDetails?.name || config?.storeName || (isMerchantMode ? 'USA BEAUTY STORE' : 'Store Admin');
   const isConnected = connection?.isConnected;
 
   // Real region list from recorded visitor telemetry
@@ -49,7 +49,45 @@ export default function DashboardView({ stats, config, connection, onOpenConnect
   return (
     <div>
       {/* Top Banner Connection Notice */}
-      {!isConnected ? (
+      {isMerchantMode ? (
+        <div style={{
+          background: '#ecfdf5',
+          border: '1px solid #a7f3d0',
+          borderRadius: '16px',
+          padding: '14px 20px',
+          marginBottom: '24px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          flexWrap: 'wrap',
+          gap: '12px'
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <span style={{
+              width: '10px',
+              height: '10px',
+              borderRadius: '50%',
+              background: '#10b981',
+              boxShadow: '0 0 8px #10b981'
+            }}></span>
+            <div>
+              <div style={{ fontSize: '13.5px', fontWeight: 700, color: '#065f46' }}>
+                Booster Engine is Live & Active on {merchantName}
+              </div>
+              <div style={{ fontSize: '12px', color: '#047857' }}>
+                Real-time traffic telemetry, social proof popups, and conversion widgets are actively running on your storefront.
+              </div>
+            </div>
+          </div>
+          <button 
+            className="btn btn-white"
+            onClick={() => onNavigate('widgets')}
+            style={{ fontSize: '12px', padding: '6px 14px' }}
+          >
+            Customize Widgets
+          </button>
+        </div>
+      ) : (!isConnected ? (
         <div style={{
           background: '#eff6ff',
           border: '1px solid #bfdbfe',
@@ -128,7 +166,7 @@ export default function DashboardView({ stats, config, connection, onOpenConnect
             Manage Connection
           </button>
         </div>
-      )}
+      ))}
 
       {/* Page Header (Adminator Style) */}
       <div className="page-header-wrap">
@@ -151,9 +189,11 @@ export default function DashboardView({ stats, config, connection, onOpenConnect
         </div>
 
         <div className="header-action-btns">
-          <button className="btn btn-white" onClick={onOpenConnect}>
-            <Store size={15} /> Store Settings
-          </button>
+          {!isMerchantMode && (
+            <button className="btn btn-white" onClick={onOpenConnect}>
+              <Store size={15} /> Store Settings
+            </button>
+          )}
           <button className="btn btn-blue" onClick={() => onNavigate('seo')}>
             <Plus size={15} /> New SEO Article
           </button>

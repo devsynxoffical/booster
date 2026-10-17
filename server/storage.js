@@ -68,8 +68,10 @@ const initialMultiStoreData = {
     scopes: "read_products,write_products,read_content,write_content,read_orders,read_script_tags,write_script_tags",
     publicAppUrl: PUBLIC_URL
   },
-  activeStoreId: null,
-  stores: []
+  activeStoreId: "chandkali",
+  stores: [
+    defaultStoreTemplate("chandkali.myshopify.com", "USA BEAUTY STORE")
+  ]
 };
 
 export function loadData() {
