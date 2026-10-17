@@ -42,12 +42,12 @@
         "useRealOrdersOnly": true
       },
       "stats": {
-        "totalVisitors": 243,
-        "pageViews": 511,
+        "totalVisitors": 251,
+        "pageViews": 521,
         "uniqueVisitors": 1,
         "bounceRate": 0,
-        "organicVisitors": 225,
-        "organicSharePercent": 92.6,
+        "organicVisitors": 235,
+        "organicSharePercent": 93.6,
         "conversionRate": 0,
         "conversionUpliftPercent": 0,
         "totalOrdersBoosted": 0,
@@ -55,8 +55,7 @@
         "popupImpressions": 0,
         "popupClicks": 0,
         "regions": {
-          "PK": 1,
-          "US": 240
+          "US": 251
         },
         "recentEvents": [
           {

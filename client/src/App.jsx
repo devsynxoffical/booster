@@ -126,9 +126,24 @@ export default function App() {
 
   useEffect(() => {
     refreshAllData();
-    const interval = setInterval(refreshAllData, 8000);
-    return () => clearInterval(interval);
-  }, []);
+    // Fast live telemetry polling (every 1.5s for instant real-time updates)
+    const interval = setInterval(refreshAllData, 1500);
+
+    // Instant refresh when user switches tabs back to admin panel
+    const handleFocus = () => refreshAllData();
+    const handleVisibility = () => {
+      if (document.visibilityState === 'visible') refreshAllData();
+    };
+
+    window.addEventListener('focus', handleFocus);
+    document.addEventListener('visibilitychange', handleVisibility);
+
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener('focus', handleFocus);
+      document.removeEventListener('visibilitychange', handleVisibility);
+    };
+  }, [activeStore]);
 
   const handleUpdateConfig = async (newConfig) => {
     setConfig(newConfig);

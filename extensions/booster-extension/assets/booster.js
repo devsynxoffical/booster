@@ -68,9 +68,14 @@
   }
 
   /* -------------------------------------------------------------
-   * 1. Track Organic Referral & Page Impression
+   * 1. Track Organic Referral & Real-Time Page Impressions
    * ------------------------------------------------------------- */
-  function recordTrafficAttribution() {
+  let lastRecordedUrl = '';
+  function recordTrafficAttribution(customUrl, eventType) {
+    const targetUrl = customUrl || window.location.href;
+    if (lastRecordedUrl === targetUrl && eventType === 'visit') return;
+    lastRecordedUrl = targetUrl;
+
     const referrer = document.referrer;
     const isOrganic = referrer && (
       referrer.includes('google.') ||
@@ -83,19 +88,57 @@
 
     if (config.appUrl) {
       try {
-        fetch(`${config.appUrl}/api/public/record-event`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            shop: detectedShop,
-            type: isOrganic ? 'organic_visit' : 'visit',
-            referrer: referrer || 'direct',
-            url: window.location.href,
-            timestamp: new Date().toISOString()
-          })
-        }).catch(() => {});
+        const payload = JSON.stringify({
+          shop: detectedShop,
+          type: eventType || (isOrganic ? 'organic_visit' : 'visit'),
+          referrer: referrer || 'direct',
+          url: targetUrl,
+          country: 'US',
+          timestamp: new Date().toISOString()
+        });
+
+        if (navigator.sendBeacon) {
+          navigator.sendBeacon(`${config.appUrl}/api/public/record-event`, new Blob([payload], { type: 'application/json' }));
+        } else {
+          fetch(`${config.appUrl}/api/public/record-event`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: payload,
+            keepalive: true
+          }).catch(() => {});
+        }
       } catch (e) {}
     }
+  }
+
+  // Live Navigation & Route Listener (Tracks Shopify AJAX/SPA page transitions in real time)
+  function initLiveRouteTracking() {
+    window.addEventListener('popstate', () => {
+      recordTrafficAttribution(window.location.href, 'page_view');
+    });
+
+    const origPush = history.pushState;
+    if (origPush) {
+      history.pushState = function() {
+        origPush.apply(this, arguments);
+        recordTrafficAttribution(window.location.href, 'page_view');
+      };
+    }
+
+    const origReplace = history.replaceState;
+    if (origReplace) {
+      history.replaceState = function() {
+        origReplace.apply(this, arguments);
+        recordTrafficAttribution(window.location.href, 'page_view');
+      };
+    }
+
+    // Active shopper heartbeat (Keeps live view updated while shopper is actively browsing)
+    setInterval(() => {
+      if (!document.hidden) {
+        recordTrafficAttribution(window.location.href, 'heartbeat');
+      }
+    }, 15000);
   }
 
   /* -------------------------------------------------------------
@@ -423,6 +466,7 @@
    * ------------------------------------------------------------- */
   function boot() {
     recordTrafficAttribution();
+    initLiveRouteTracking();
     initFreeShippingBar();
     initRecentSalesPopup();
     initVisitorCounter();
