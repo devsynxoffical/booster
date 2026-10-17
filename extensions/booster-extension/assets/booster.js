@@ -15,11 +15,22 @@
   window.__ShopifyGrowthBoosterInitialized = true;
 
   const rootEl = document.getElementById('shopify-growth-booster-root');
+  const appEndpoint = rootEl?.dataset.appUrl || 'https://booster-5imz.onrender.com';
+
+  // Automatically inject booster.css into customer theme head (Zero code required!)
+  if (!document.getElementById('shopify-booster-live-css')) {
+    const link = document.createElement('link');
+    link.id = 'shopify-booster-live-css';
+    link.rel = 'stylesheet';
+    link.href = `${appEndpoint}/extensions/assets/booster.css`;
+    document.head.appendChild(link);
+  }
+
   const config = {
-    appUrl: rootEl?.dataset.appUrl || '',
+    appUrl: appEndpoint,
     enablePopups: rootEl ? rootEl.dataset.enablePopups === 'true' : true,
     popupPosition: rootEl?.dataset.popupPosition || 'bottom-left',
-    popupDelay: parseInt(rootEl?.dataset.popupDelay || '7', 10) * 1000,
+    popupDelay: parseInt(rootEl?.dataset.popupDelay || '6', 10) * 1000,
     popupDuration: parseInt(rootEl?.dataset.popupDuration || '5', 10) * 1000,
     enableVisitorCounter: rootEl ? rootEl.dataset.enableVisitorCounter === 'true' : true,
     minVisitors: parseInt(rootEl?.dataset.minVisitors || '12', 10),
@@ -30,8 +41,8 @@
     cartTotal: parseFloat(rootEl?.dataset.cartTotal || '0'),
     enableCountdown: rootEl ? rootEl.dataset.enableCountdown === 'true' : true,
     countdownMinutes: parseInt(rootEl?.dataset.countdownMinutes || '15', 10),
-    accentColor: rootEl?.dataset.accentColor || '#10b981',
-    themeMode: rootEl?.dataset.themeMode || 'glass'
+    accentColor: rootEl?.dataset.accentColor || '#2563eb',
+    themeMode: rootEl?.dataset.themeMode || 'light'
   };
 
   let livePurchases = [];

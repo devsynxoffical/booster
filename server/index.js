@@ -228,6 +228,26 @@ async function startServer() {
       store.settings.storeUrl = `https://${cleanShop}`;
       store.settings.shippingCurrency = store.currencySymbol;
 
+      // Auto-inject ScriptTag into customer storefront (Zero code editing for customer!)
+      try {
+        const publicUrl = data.appConfig.publicAppUrl || `https://booster-5imz.onrender.com`;
+        const scriptUrl = `${publicUrl}/extensions/assets/booster.js`;
+        const existingTags = await shopifyApiRequest(cleanShop, accessToken, '/admin/api/2026-01/script_tags.json');
+        const alreadyInjected = existingTags.data?.script_tags?.some(st => st.src.includes('booster.js'));
+
+        if (!alreadyInjected) {
+          await shopifyApiRequest(cleanShop, accessToken, '/admin/api/2026-01/script_tags.json', 'POST', {
+            script_tag: {
+              event: 'onload',
+              src: scriptUrl
+            }
+          });
+          console.log(`Auto-injected ScriptTag into ${cleanShop}`);
+        }
+      } catch (stErr) {
+        console.warn('ScriptTag auto-injection notice:', stErr);
+      }
+
       if (orders.length > 0) {
         store.stats.totalOrdersBoosted = orders.length;
         store.stats.revenueGenerated = parseFloat(orders.reduce((sum, o) => sum + parseFloat(o.total_price || 0), 0).toFixed(2));

@@ -65,7 +65,7 @@ const initialMultiStoreData = {
   appConfig: {
     clientId: CLIENT_ID,
     clientSecret: CLIENT_SECRET,
-    scopes: "read_products,write_products,read_content,write_content,read_orders",
+    scopes: "read_products,write_products,read_content,write_content,read_orders,read_script_tags,write_script_tags",
     publicAppUrl: PUBLIC_URL
   },
   activeStoreId: null,
