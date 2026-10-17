@@ -6,7 +6,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const DATA_FILE = path.join(__dirname, 'data.json');
 
-const CLIENT_ID = process.env.SHOPIFY_API_KEY || "bc4244d5d21d40ac26fb7e0154a47d35";
+const CLIENT_ID = process.env.SHOPIFY_API_KEY || "4d64bd85effdc3825141e559a7c7b890";
 const CLIENT_SECRET = process.env.SHOPIFY_API_SECRET || "";
 const PUBLIC_URL = process.env.PUBLIC_APP_URL || "https://booster-5imz.onrender.com";
 
