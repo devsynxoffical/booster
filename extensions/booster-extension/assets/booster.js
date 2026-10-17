@@ -97,16 +97,14 @@
           timestamp: new Date().toISOString()
         });
 
-        if (navigator.sendBeacon) {
-          navigator.sendBeacon(`${config.appUrl}/api/public/record-event`, new Blob([payload], { type: 'application/json' }));
-        } else {
-          fetch(`${config.appUrl}/api/public/record-event`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: payload,
-            keepalive: true
-          }).catch(() => {});
-        }
+        fetch(`${config.appUrl}/api/public/record-event`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: payload,
+          mode: 'cors',
+          credentials: 'omit',
+          keepalive: true
+        }).catch(() => {});
       } catch (e) {}
     }
   }
