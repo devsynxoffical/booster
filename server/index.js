@@ -243,9 +243,16 @@ async function startServer() {
     }
   });
 
-  /* -------------------------------------------------------------
-   * 2. Multi-Store Management APIs (For Admin Panel)
-   * ------------------------------------------------------------- */
+  // Update App Credentials directly from Admin Panel (No .env needed!)
+  app.post('/api/stores/app-config', (req, res) => {
+    const { clientId, clientSecret, publicAppUrl } = req.body;
+    const data = loadData();
+    if (clientId) data.appConfig.clientId = clientId.trim();
+    if (clientSecret) data.appConfig.clientSecret = clientSecret.trim();
+    if (publicAppUrl) data.appConfig.publicAppUrl = publicAppUrl.trim();
+    saveData(data);
+    res.json({ success: true, appConfig: data.appConfig });
+  });
 
   // Get all connected stores list & active store
   app.get('/api/stores', (req, res) => {

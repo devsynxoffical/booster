@@ -13,25 +13,38 @@ import {
   Copy,
   Check,
   Layers,
-  ArrowRight
+  ArrowRight,
+  Key,
+  Save,
+  Settings
 } from 'lucide-react';
 
 export default function ShopifyConnectModal({ isOpen, onClose, onStoreChanged }) {
   const [storesData, setStoresData] = useState({ activeStoreId: null, stores: [], appConfig: {} });
-  const [activeTab, setActiveTab] = useState('oauth'); // 'oauth' | 'manual' | 'manage'
+  const [activeTab, setActiveTab] = useState('oauth'); // 'oauth' | 'manual' | 'manage' | 'keys'
   const [shopDomain, setShopDomain] = useState('');
   const [accessToken, setAccessToken] = useState('');
-  const [oauthShopInput, setOauthShopInput] = useState('');
+  const [oauthShopInput, setOauthShopInput] = useState('chandkali.myshopify.com');
   const [generatedLink, setGeneratedLink] = useState('');
   const [copied, setCopied] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [statusMsg, setStatusMsg] = useState(null);
+
+  // App Master Credentials State (Editable directly in UI!)
+  const [clientIdInput, setClientIdInput] = useState('');
+  const [clientSecretInput, setClientSecretInput] = useState('');
+  const [publicUrlInput, setPublicUrlInput] = useState('');
 
   const fetchStores = async () => {
     try {
       const res = await fetch('/api/stores');
       const data = await res.json();
       setStoresData(data);
+      if (data.appConfig) {
+        setClientIdInput(data.appConfig.clientId || 'bc4244d5d21d40ac26fb7e0154a47d35');
+        setClientSecretInput(data.appConfig.clientSecret || '');
+        setPublicUrlInput(data.appConfig.publicAppUrl || window.location.origin);
+      }
     } catch (e) {
       console.error(e);
     }
@@ -46,12 +59,42 @@ export default function ShopifyConnectModal({ isOpen, onClose, onStoreChanged })
 
   if (!isOpen) return null;
 
+  // Save Master App Keys from UI
+  const handleSaveAppConfig = async (e) => {
+    e.preventDefault();
+    setIsLoading(true);
+    setStatusMsg(null);
+
+    try {
+      const res = await fetch('/api/stores/app-config', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          clientId: clientIdInput,
+          clientSecret: clientSecretInput,
+          publicAppUrl: publicUrlInput
+        })
+      });
+      const data = await res.json();
+      if (data.success) {
+        setStatusMsg({ type: 'success', text: 'App Client ID and Secret saved successfully in the database!' });
+        fetchStores();
+      } else {
+        setStatusMsg({ type: 'error', text: 'Failed to save app keys.' });
+      }
+    } catch (err) {
+      setStatusMsg({ type: 'error', text: 'Network connection error.' });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   // Generate 1-Click OAuth Install Link
   const handleGenerateOAuth = (e) => {
     e.preventDefault();
     if (!oauthShopInput) return;
     const clean = oauthShopInput.replace(/^https?:\/\//, '').replace(/\/$/, '');
-    const publicUrl = storesData.appConfig?.publicAppUrl || window.location.origin;
+    const publicUrl = publicUrlInput || storesData.appConfig?.publicAppUrl || window.location.origin;
     const link = `${publicUrl}/auth?shop=${encodeURIComponent(clean)}`;
     setGeneratedLink(link);
   };
@@ -115,7 +158,7 @@ export default function ShopifyConnectModal({ isOpen, onClose, onStoreChanged })
     }
   };
 
-  // Delete / Disconnect store
+  // Delete store
   const handleDeleteStore = async (storeId, storeName) => {
     if (!window.confirm(`Disconnect and remove ${storeName}?`)) return;
     try {
@@ -146,7 +189,7 @@ export default function ShopifyConnectModal({ isOpen, onClose, onStoreChanged })
         background: '#ffffff',
         borderRadius: '20px',
         width: '100%',
-        maxWidth: '680px',
+        maxWidth: '700px',
         boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
         border: '1px solid #e2e8f0',
         overflow: 'hidden',
@@ -177,10 +220,10 @@ export default function ShopifyConnectModal({ isOpen, onClose, onStoreChanged })
             </div>
             <div>
               <h3 style={{ fontSize: '16px', fontWeight: '800', color: '#0f172a' }}>
-                Multi-Store Manager
+                Multi-Store Management Panel
               </h3>
               <p style={{ fontSize: '12px', color: '#64748b' }}>
-                Connect and manage multiple Shopify stores from a single unified admin
+                Manage all your customer Shopify stores without touching configuration files
               </p>
             </div>
           </div>
@@ -193,7 +236,7 @@ export default function ShopifyConnectModal({ isOpen, onClose, onStoreChanged })
         </div>
 
         {/* Navigation Tabs */}
-        <div style={{ display: 'flex', borderBottom: '1px solid #e2e8f0', background: '#f8fafc', padding: '0 24px' }}>
+        <div style={{ display: 'flex', borderBottom: '1px solid #e2e8f0', background: '#f8fafc', padding: '0 24px', overflowX: 'auto' }}>
           <button
             onClick={() => setActiveTab('oauth')}
             style={{
@@ -204,10 +247,11 @@ export default function ShopifyConnectModal({ isOpen, onClose, onStoreChanged })
               color: activeTab === 'oauth' ? '#2563eb' : '#64748b',
               fontWeight: activeTab === 'oauth' ? 700 : 500,
               fontSize: '13px',
-              cursor: 'pointer'
+              cursor: 'pointer',
+              whiteSpace: 'nowrap'
             }}
           >
-            ⚡ 1-Click Install Link
+            ⚡ 1-Click Install Store
           </button>
 
           <button
@@ -220,10 +264,11 @@ export default function ShopifyConnectModal({ isOpen, onClose, onStoreChanged })
               color: activeTab === 'manual' ? '#2563eb' : '#64748b',
               fontWeight: activeTab === 'manual' ? 700 : 500,
               fontSize: '13px',
-              cursor: 'pointer'
+              cursor: 'pointer',
+              whiteSpace: 'nowrap'
             }}
           >
-            🔑 Admin API Token
+            🔑 Store Access Token
           </button>
 
           <button
@@ -236,10 +281,28 @@ export default function ShopifyConnectModal({ isOpen, onClose, onStoreChanged })
               color: activeTab === 'manage' ? '#2563eb' : '#64748b',
               fontWeight: activeTab === 'manage' ? 700 : 500,
               fontSize: '13px',
-              cursor: 'pointer'
+              cursor: 'pointer',
+              whiteSpace: 'nowrap'
             }}
           >
             🏬 Connected Stores ({storesData.stores?.length || 0})
+          </button>
+
+          <button
+            onClick={() => setActiveTab('keys')}
+            style={{
+              padding: '12px 16px',
+              background: 'transparent',
+              border: 'none',
+              borderBottom: activeTab === 'keys' ? '2px solid #2563eb' : '2px solid transparent',
+              color: activeTab === 'keys' ? '#2563eb' : '#64748b',
+              fontWeight: activeTab === 'keys' ? 700 : 500,
+              fontSize: '13px',
+              cursor: 'pointer',
+              whiteSpace: 'nowrap'
+            }}
+          >
+            ⚙️ App Keys
           </button>
         </div>
 
@@ -268,10 +331,10 @@ export default function ShopifyConnectModal({ isOpen, onClose, onStoreChanged })
             <div>
               <div style={{ marginBottom: '16px' }}>
                 <h4 style={{ fontSize: '14.5px', fontWeight: 700, color: '#0f172a' }}>
-                  Generate 1-Click Shopify App Install Link
+                  Connect Any Store in 1-Click
                 </h4>
                 <p style={{ fontSize: '13px', color: '#64748b', marginTop: '4px' }}>
-                  Enter any Shopify store domain. Click the link (or send it to the store owner) to authorize and automatically connect the store into your booster!
+                  Enter your customer's store domain. Click the link to authorize and connect their store immediately.
                 </p>
               </div>
 
@@ -280,7 +343,7 @@ export default function ShopifyConnectModal({ isOpen, onClose, onStoreChanged })
                   <input 
                     type="text" 
                     className="form-input" 
-                    placeholder="e.g. chandkali.myshopify.com or brand.myshopify.com"
+                    placeholder="e.g. chandkali.myshopify.com"
                     value={oauthShopInput}
                     onChange={(e) => setOauthShopInput(e.target.value)}
                     required
@@ -302,7 +365,7 @@ export default function ShopifyConnectModal({ isOpen, onClose, onStoreChanged })
                   gap: '10px'
                 }}>
                   <div style={{ fontSize: '12px', fontWeight: 700, color: '#0f172a' }}>
-                    Your 1-Click OAuth Install Link:
+                    Your 1-Click Install Link:
                   </div>
                   <div style={{
                     background: '#ffffff',
@@ -340,15 +403,15 @@ export default function ShopifyConnectModal({ isOpen, onClose, onStoreChanged })
             </div>
           )}
 
-          {/* TAB 2: Direct Admin API Token */}
+          {/* TAB 2: Direct Store Access Token */}
           {activeTab === 'manual' && (
             <form onSubmit={handleManualConnect}>
               <div style={{ marginBottom: '16px' }}>
                 <h4 style={{ fontSize: '14.5px', fontWeight: 700, color: '#0f172a' }}>
-                  Direct Admin Access Token Connect
+                  Connect Store via Admin API Token
                 </h4>
                 <p style={{ fontSize: '13px', color: '#64748b', marginTop: '4px' }}>
-                  Connect any store immediately using its Shopify Admin API Token (from Develop apps).
+                  Paste the customer's store domain and token to connect directly without OAuth.
                 </p>
               </div>
 
@@ -387,15 +450,13 @@ export default function ShopifyConnectModal({ isOpen, onClose, onStoreChanged })
           {/* TAB 3: Connected Stores List */}
           {activeTab === 'manage' && (
             <div>
-              <div style={{ marginBottom: '16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                <div>
-                  <h4 style={{ fontSize: '14.5px', fontWeight: 700, color: '#0f172a' }}>
-                    Connected Stores ({storesData.stores?.length || 0})
-                  </h4>
-                  <p style={{ fontSize: '12.5px', color: '#64748b' }}>
-                    Click "Switch to this Store" to manage its specific dashboard, widgets & SEO.
-                  </p>
-                </div>
+              <div style={{ marginBottom: '16px' }}>
+                <h4 style={{ fontSize: '14.5px', fontWeight: 700, color: '#0f172a' }}>
+                  Connected Customer Stores ({storesData.stores?.length || 0})
+                </h4>
+                <p style={{ fontSize: '12.5px', color: '#64748b' }}>
+                  Click "Switch to this Store" to view and manage its analytics, widgets, and SEO.
+                </p>
               </div>
 
               {storesData.stores && storesData.stores.length > 0 ? (
@@ -453,11 +514,67 @@ export default function ShopifyConnectModal({ isOpen, onClose, onStoreChanged })
                   <Store size={36} color="#94a3b8" style={{ margin: '0 auto 10px auto' }} />
                   <p style={{ fontSize: '13.5px', fontWeight: 600, color: '#334155' }}>No stores connected yet.</p>
                   <p style={{ fontSize: '12.5px', color: '#64748b', marginTop: '4px' }}>
-                    Use the 1-Click Install Link or Admin API Token tab to add your first store.
+                    Use the 1-Click Install Link or Token tab to connect your first store.
                   </p>
                 </div>
               )}
             </div>
+          )}
+
+          {/* TAB 4: In-App Master App Keys (No .env needed!) */}
+          {activeTab === 'keys' && (
+            <form onSubmit={handleSaveAppConfig}>
+              <div style={{ marginBottom: '16px' }}>
+                <h4 style={{ fontSize: '14.5px', fontWeight: 700, color: '#0f172a' }}>
+                  Shopify App Keys (Configured In-App)
+                </h4>
+                <p style={{ fontSize: '13px', color: '#64748b', marginTop: '4px' }}>
+                  You do not need to edit .env or restart Render. Paste your Shopify App credentials here to save them directly in the database.
+                </p>
+              </div>
+
+              <div className="form-group">
+                <label className="form-label">Client ID (API Key)</label>
+                <input 
+                  type="text" 
+                  className="form-input" 
+                  value={clientIdInput}
+                  onChange={(e) => setClientIdInput(e.target.value)}
+                  placeholder="bc4244d5d21d40ac26fb7e0154a47d35"
+                  required
+                />
+              </div>
+
+              <div className="form-group">
+                <label className="form-label">Client Secret (API Secret)</label>
+                <input 
+                  type="password" 
+                  className="form-input" 
+                  value={clientSecretInput}
+                  onChange={(e) => setClientSecretInput(e.target.value)}
+                  placeholder="shpss_xxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+                  required
+                />
+              </div>
+
+              <div className="form-group">
+                <label className="form-label">Public Server Host URL</label>
+                <input 
+                  type="url" 
+                  className="form-input" 
+                  value={publicUrlInput}
+                  onChange={(e) => setPublicUrlInput(e.target.value)}
+                  placeholder="https://booster-5imz.onrender.com"
+                  required
+                />
+              </div>
+
+              <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '14px' }}>
+                <button type="submit" className="btn btn-blue" disabled={isLoading} style={{ minWidth: '160px' }}>
+                  {isLoading ? <><Loader2 size={15} className="animate-spin" /> Saving...</> : <><Save size={15} /> Save Keys to Database</>}
+                </button>
+              </div>
+            </form>
           )}
         </div>
       </div>
