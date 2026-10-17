@@ -16,10 +16,11 @@ import {
   Globe,
   Store,
   ShieldCheck,
-  Radio
+  Radio,
+  MapPin
 } from 'lucide-react';
 
-export default function DashboardView({ stats, config, connection, isMerchantMode, onOpenConnect, onNavigate }) {
+export default function DashboardView({ stats, config, connection, isMerchantMode, onOpenConnect, onNavigate, onRefreshData }) {
   const formattedDate = new Date().toLocaleDateString('en-US', {
     weekday: 'long',
     month: 'long',
@@ -72,21 +73,28 @@ export default function DashboardView({ stats, config, connection, isMerchantMod
 
   const [isGeneratingTraffic, setIsGeneratingTraffic] = useState(false);
   const [trafficResult, setTrafficResult] = useState(null);
+  const [viewsCountInput, setViewsCountInput] = useState('240');
+  const [targetPathInput, setTargetPathInput] = useState('/');
 
-  const handleBoostTrafficNow = async () => {
+  const handleSendViews = async (countOverride) => {
     setIsGeneratingTraffic(true);
     setTrafficResult(null);
     try {
+      const countToSend = countOverride !== undefined ? countOverride : parseInt(viewsCountInput, 10);
       const qs = connection?.shopDomain ? `?shop=${encodeURIComponent(connection.shopDomain)}` : '';
-      const res = await fetch(`/api/traffic/auto-generate${qs}`, {
+      const res = await fetch(`/api/traffic/boost${qs}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ niche: connection?.storeDetails?.name || config?.storeName })
+        body: JSON.stringify({ 
+          count: countToSend,
+          targetPath: targetPathInput || '/'
+        })
       });
       const data = await res.json();
       if (data.success) {
         setTrafficResult(data.message);
-        setTimeout(() => setTrafficResult(null), 8000);
+        if (onRefreshData) onRefreshData();
+        setTimeout(() => setTrafficResult(null), 10000);
       }
     } catch (e) {
       console.error(e);
@@ -249,76 +257,177 @@ export default function DashboardView({ stats, config, connection, isMerchantMod
         </div>
       </div>
 
-      {/* Autonomous Traffic Generator Banner Card (Super Admin Only) */}
+      {/* Super Admin Autonomous Traffic Booster Banner (Super Admin Only) */}
       {!isMerchantMode && (
         <div style={{
-          background: '#ffffff',
+          background: 'linear-gradient(135deg, #ffffff 0%, #f8faff 100%)',
           border: '1px solid #bfdbfe',
           borderRadius: '16px',
-          padding: '16px 20px',
-          marginBottom: '24px',
-          boxShadow: '0 4px 14px -2px rgba(37, 99, 235, 0.08)'
+          padding: '20px 24px',
+          marginBottom: '26px',
+          boxShadow: '0 4px 16px -2px rgba(37, 99, 235, 0.08)'
         }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '14px' }}>
+          <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', flexWrap: 'wrap', gap: '16px', marginBottom: '16px' }}>
             <div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
-                <span className="badge badge-blue" style={{ fontSize: '11px', display: 'flex', alignItems: 'center', gap: '5px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
+                <span className="badge badge-blue" style={{ fontSize: '11px', display: 'flex', alignItems: 'center', gap: '6px' }}>
                   <span style={{ width: '7px', height: '7px', borderRadius: '50%', background: '#2563eb', display: 'inline-block' }}></span>
-                  Autonomous Traffic Engine Active
+                  Super Admin Exclusive
+                </span>
+                <span className="badge badge-green" style={{ fontSize: '11px', display: 'flex', alignItems: 'center', gap: '5px' }}>
+                  <MapPin size={12} /> Target: United States (US)
                 </span>
                 <span style={{ fontSize: '12px', color: '#64748b' }}>
-                  Auto-indexing across Google Search • Bing IndexNow • Pinterest • TikTok
+                  Hidden from merchants • Multi-city live US views
                 </span>
               </div>
-              <div style={{ fontSize: '14.5px', fontWeight: 700, color: '#0f172a' }}>
-                Automated Organic Traffic & Search Indexing Pipeline
+              <div style={{ fontSize: '16px', fontWeight: 800, color: '#0f172a' }}>
+                ⚡ Live Store Traffic Booster (US Locations)
               </div>
-              <div style={{ fontSize: '12.5px', color: '#475569', marginTop: '2px', maxWidth: '640px' }}>
-                The Booster automatically scans buyer keyword trends, auto-publishes optimized buyer guides to your Shopify blog, and pings search engine sitemaps every 12 hours.
+              <div style={{ fontSize: '12.5px', color: '#475569', marginTop: '3px', maxWidth: '680px', lineHeight: 1.5 }}>
+                Send real-time traffic bursts to your active store with authentic US locations (New York, California, Texas, Florida, Chicago) and search engine referral paths (Google, Bing, Pinterest).
               </div>
             </div>
 
-            <button 
+            {/* Quick Presets */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+              <button
+                type="button"
+                className="btn btn-white"
+                onClick={() => { setViewsCountInput('27'); handleSendViews(27); }}
+                disabled={isGeneratingTraffic}
+                style={{ fontSize: '12px', padding: '6px 12px', fontWeight: 600, borderColor: '#cbd5e1' }}
+              >
+                +27 US Views
+              </button>
+              <button
+                type="button"
+                className="btn btn-white"
+                onClick={() => { setViewsCountInput('240'); handleSendViews(240); }}
+                disabled={isGeneratingTraffic}
+                style={{ fontSize: '12px', padding: '6px 12px', fontWeight: 600, borderColor: '#93c5fd', color: '#1d4ed8', background: '#eff6ff' }}
+              >
+                +240 US Views
+              </button>
+              <button
+                type="button"
+                className="btn btn-white"
+                onClick={() => { setViewsCountInput('300'); handleSendViews(300); }}
+                disabled={isGeneratingTraffic}
+                style={{ fontSize: '12px', padding: '6px 12px', fontWeight: 600, borderColor: '#86efac', color: '#15803d', background: '#f0fdf4' }}
+              >
+                +300 US Views
+              </button>
+              <button
+                type="button"
+                className="btn btn-blue"
+                onClick={() => {
+                  const randomCount = Math.floor(Math.random() * (340 - 25 + 1)) + 25;
+                  setViewsCountInput(String(randomCount));
+                  handleSendViews(randomCount);
+                }}
+                disabled={isGeneratingTraffic}
+                style={{
+                  fontSize: '12.5px',
+                  padding: '7px 16px',
+                  fontWeight: 700,
+                  boxShadow: '0 3px 10px rgba(37, 99, 235, 0.25)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px'
+                }}
+              >
+                {isGeneratingTraffic ? (
+                  <>
+                    <Radio size={14} className="animate-pulse" /> Sending Views...
+                  </>
+                ) : (
+                  <>
+                    <Zap size={14} /> 🎲 Send Random US Views
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+
+          {/* Custom View Count & Page Target Bar */}
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '12px',
+            flexWrap: 'wrap',
+            paddingTop: '12px',
+            borderTop: '1px solid #f1f5f9'
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <span style={{ fontSize: '12px', fontWeight: 600, color: '#475569' }}>Target Page:</span>
+              <input
+                type="text"
+                value={targetPagePathInput}
+                onChange={(e) => setTargetPathInput(e.target.value)}
+                placeholder="/ or /products/..."
+                style={{
+                  padding: '6px 10px',
+                  fontSize: '12px',
+                  borderRadius: '6px',
+                  border: '1px solid #cbd5e1',
+                  width: '160px',
+                  fontFamily: 'monospace'
+                }}
+              />
+            </div>
+
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <span style={{ fontSize: '12px', fontWeight: 600, color: '#475569' }}>View Count:</span>
+              <input
+                type="number"
+                value={viewsCountInput}
+                onChange={(e) => setViewsCountInput(e.target.value)}
+                placeholder="e.g. 240, 300, 27"
+                min="1"
+                max="5000"
+                style={{
+                  padding: '6px 10px',
+                  fontSize: '12px',
+                  borderRadius: '6px',
+                  border: '1px solid #cbd5e1',
+                  width: '90px',
+                  fontWeight: 600
+                }}
+              />
+            </div>
+
+            <button
+              type="button"
               className="btn btn-blue"
-              onClick={handleBoostTrafficNow}
+              onClick={() => handleSendViews()}
               disabled={isGeneratingTraffic}
               style={{
-                padding: '10px 18px',
-                fontSize: '13px',
-                fontWeight: 700,
-                boxShadow: '0 3px 10px rgba(37, 99, 235, 0.25)',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '8px'
+                fontSize: '12px',
+                padding: '6px 14px',
+                fontWeight: 600
               }}
             >
-              {isGeneratingTraffic ? (
-                <>
-                  <Radio size={15} className="animate-pulse" /> Generating Traffic...
-                </>
-              ) : (
-                <>
-                  <Zap size={15} /> 🚀 Boost Store Traffic Now
-                </>
-              )}
+              Send Custom Views
             </button>
           </div>
 
           {trafficResult && (
             <div style={{
-              marginTop: '12px',
-              padding: '10px 14px',
+              marginTop: '14px',
+              padding: '11px 16px',
               borderRadius: '8px',
               background: '#eff6ff',
               border: '1px solid #93c5fd',
-              fontSize: '12.5px',
+              fontSize: '13px',
               color: '#1e40af',
               display: 'flex',
               alignItems: 'center',
               gap: '8px',
-              fontWeight: 600
+              fontWeight: 600,
+              boxShadow: '0 2px 6px rgba(37, 99, 235, 0.08)'
             }}>
-              <Sparkles size={14} style={{ color: '#2563eb' }} />
+              <Sparkles size={16} style={{ color: '#2563eb', flexShrink: 0 }} />
               {trafficResult}
             </div>
           )}

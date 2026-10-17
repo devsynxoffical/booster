@@ -599,6 +599,7 @@ export default function App() {
               }}
               onOpenConnect={() => setIsConnectModalOpen(true)}
               onNavigate={setCurrentView}
+              onRefreshData={refreshAllData}
             />
           )}
 
