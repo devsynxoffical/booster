@@ -1,0 +1,26 @@
+# Shopify App Configuration for Booster Growth Platform
+client_id = "booster_growth_app_client"
+name = "Shopify Growth & Organic Sales Booster"
+handle = "shopify-growth-booster"
+application_url = "http://localhost:3005"
+embedded = true
+
+[build]
+automatically_update_urls_on_dev = true
+dev_store_url = ""
+
+[access_scopes]
+# Scopes needed for organic SEO, products, blogs, and theme extensions
+scopes = "read_products,write_products,read_content,write_content,read_themes,write_themes,read_orders"
+
+[auth]
+redirect_urls = [
+  "http://localhost:3005/auth/callback",
+  "http://localhost:3005/auth/shopify/callback"
+]
+
+[webhooks]
+api_version = "2026-01"
+
+[pos]
+embedded = false

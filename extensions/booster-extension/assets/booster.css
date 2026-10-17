@@ -1,0 +1,356 @@
+/**
+ * Shopify Growth Booster - Storefront CSS
+ * Lightweight, zero-conflict, modern glassmorphism design
+ */
+
+/* -------------------------------------------------------------
+ * 1. Root & Shared Variables
+ * ------------------------------------------------------------- */
+:root {
+  --booster-accent: #10b981;
+  --booster-accent-hover: #059669;
+  --booster-font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --booster-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+  --booster-glass-bg: rgba(255, 255, 255, 0.88);
+  --booster-glass-border: rgba(229, 231, 235, 0.8);
+  --booster-text-primary: #111827;
+  --booster-text-secondary: #4b5563;
+}
+
+/* -------------------------------------------------------------
+ * 2. Recent Sales Notification Popup
+ * ------------------------------------------------------------- */
+#booster-popup-container {
+  position: fixed;
+  z-index: 999998;
+  pointer-events: none;
+  font-family: var(--booster-font);
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+#booster-popup-container.booster-pos-bottom-left {
+  bottom: 24px;
+  left: 24px;
+}
+#booster-popup-container.booster-pos-bottom-right {
+  bottom: 24px;
+  right: 24px;
+}
+#booster-popup-container.booster-pos-top-left {
+  top: 24px;
+  left: 24px;
+}
+#booster-popup-container.booster-pos-top-right {
+  top: 24px;
+  right: 24px;
+}
+
+.booster-popup-card {
+  pointer-events: auto;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  max-width: 360px;
+  min-width: 290px;
+  padding: 12px 14px;
+  border-radius: 14px;
+  background: var(--booster-glass-bg);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--booster-glass-border);
+  box-shadow: var(--booster-shadow);
+  opacity: 0;
+  transform: translateY(20px) scale(0.96);
+  transition: opacity 0.4s cubic-bezier(0.16, 1, 0.3, 1), transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  position: relative;
+}
+
+.booster-popup-card.booster-show {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+
+.booster-popup-card.booster-hide {
+  opacity: 0;
+  transform: translateY(20px) scale(0.94);
+  pointer-events: none;
+}
+
+/* Dark theme variation */
+.booster-theme-dark .booster-popup-card,
+.booster-theme-dark.booster-popup-card {
+  background: rgba(17, 24, 39, 0.92);
+  border-color: rgba(55, 65, 81, 0.8);
+  color: #f9fafb;
+}
+.booster-theme-dark .booster-product-name,
+.booster-theme-dark .booster-buyer-info {
+  color: #f3f4f6 !important;
+}
+.booster-theme-dark .booster-time,
+.booster-theme-dark .booster-badge {
+  color: #9ca3af !important;
+}
+
+.booster-thumb-wrap {
+  position: relative;
+  flex-shrink: 0;
+  width: 50px;
+  height: 50px;
+  border-radius: 10px;
+  overflow: hidden;
+  background: #f3f4f6;
+  border: 1px solid rgba(0,0,0,0.06);
+}
+
+.booster-thumb {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.booster-verified-dot {
+  position: absolute;
+  bottom: 2px;
+  right: 2px;
+  background: #10b981;
+  color: #fff;
+  font-size: 9px;
+  font-weight: 700;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1.5px solid #fff;
+}
+
+.booster-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.booster-buyer-info {
+  margin: 0;
+  font-size: 13px;
+  color: var(--booster-text-primary);
+  line-height: 1.3;
+}
+.booster-buyer-info strong {
+  font-weight: 600;
+}
+
+.booster-product-name {
+  margin: 2px 0 4px 0;
+  font-size: 12px;
+  color: var(--booster-text-secondary);
+  line-height: 1.3;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.booster-product-name span {
+  font-weight: 600;
+  color: #10b981;
+}
+
+.booster-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+  color: #6b7280;
+}
+
+.booster-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-weight: 500;
+  color: #059669;
+}
+
+.booster-pulse-dot {
+  width: 6px;
+  height: 6px;
+  background: #10b981;
+  border-radius: 50%;
+  box-shadow: 0 0 0 rgba(16, 185, 129, 0.4);
+  animation: boosterPulse 1.8s infinite;
+}
+
+@keyframes boosterPulse {
+  0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
+  70% { box-shadow: 0 0 0 6px rgba(16, 185, 129, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+}
+
+.booster-close-btn {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  background: transparent;
+  border: none;
+  font-size: 16px;
+  line-height: 1;
+  color: #9ca3af;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 50%;
+  transition: color 0.15s ease;
+}
+.booster-close-btn:hover {
+  color: #111827;
+}
+
+/* -------------------------------------------------------------
+ * 3. Free Shipping Progress Bar
+ * ------------------------------------------------------------- */
+.booster-shipping-bar {
+  width: 100%;
+  background: #ffffff;
+  border-bottom: 1px solid #e5e7eb;
+  padding: 8px 16px;
+  font-family: var(--booster-font);
+  position: relative;
+  z-index: 9999;
+  text-align: center;
+}
+.booster-theme-dark.booster-shipping-bar {
+  background: #0f172a;
+  border-bottom-color: #1e293b;
+  color: #f8fafc;
+}
+
+.booster-shipping-inner {
+  max-width: 650px;
+  margin: 0 auto;
+}
+
+.booster-shipping-msg {
+  font-size: 13px;
+  color: #1f2937;
+  margin-bottom: 6px;
+}
+.booster-theme-dark .booster-shipping-msg {
+  color: #f1f5f9;
+}
+.booster-shipping-msg strong {
+  font-weight: 700;
+  color: #059669;
+}
+
+.booster-progress-track {
+  width: 100%;
+  height: 6px;
+  background: #e5e7eb;
+  border-radius: 999px;
+  overflow: hidden;
+  position: relative;
+}
+.booster-theme-dark .booster-progress-track {
+  background: #334155;
+}
+
+.booster-progress-fill {
+  height: 100%;
+  border-radius: 999px;
+  transition: width 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* -------------------------------------------------------------
+ * 4. Live Shopper & Scarcity Counter (Product Form)
+ * ------------------------------------------------------------- */
+.booster-live-viewers {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin: 12px 0;
+  padding: 8px 14px;
+  background: #fef2f2;
+  border: 1px solid #fee2e2;
+  border-radius: 8px;
+  font-family: var(--booster-font);
+  font-size: 13px;
+  color: #991b1b;
+}
+.booster-theme-dark.booster-live-viewers {
+  background: rgba(153, 27, 27, 0.15);
+  border-color: rgba(153, 27, 27, 0.3);
+  color: #fca5a5;
+}
+
+.booster-fire-icon {
+  font-size: 15px;
+  animation: boosterFlame 1.2s ease-in-out infinite alternate;
+}
+@keyframes boosterFlame {
+  0% { transform: scale(1); }
+  100% { transform: scale(1.18); }
+}
+
+.booster-scarcity-tag {
+  background: #dc2626;
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  padding: 2px 6px;
+  border-radius: 4px;
+  margin-left: 4px;
+}
+
+/* -------------------------------------------------------------
+ * 5. Countdown Urgency Timer
+ * ------------------------------------------------------------- */
+.booster-countdown-box {
+  margin: 14px 0;
+  padding: 12px 16px;
+  background: #f8fafc;
+  border: 1px dashed #cbd5e1;
+  border-radius: 10px;
+  font-family: var(--booster-font);
+  text-align: center;
+}
+.booster-theme-dark.booster-countdown-box {
+  background: #1e293b;
+  border-color: #334155;
+  color: #f8fafc;
+}
+
+.booster-timer-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #b45309;
+}
+.booster-countdown-val {
+  font-size: 24px;
+  font-weight: 800;
+  letter-spacing: 1px;
+  color: #d97706;
+  margin: 4px 0;
+}
+.booster-timer-note {
+  font-size: 11px;
+  color: #64748b;
+}
+
+/* Mobile responsiveness */
+@media (max-width: 640px) {
+  #booster-popup-container.booster-pos-bottom-left,
+  #booster-popup-container.booster-pos-bottom-right {
+    bottom: 12px;
+    left: 12px;
+    right: 12px;
+  }
+  .booster-popup-card {
+    max-width: 100%;
+    min-width: unset;
+  }
+}

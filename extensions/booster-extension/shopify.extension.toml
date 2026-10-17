@@ -1,0 +1,6 @@
+name = "Booster Conversion & SEO Widgets"
+type = "theme"
+
+[theme]
+# Theme app extension identifier
+handle = "booster-theme-extension"

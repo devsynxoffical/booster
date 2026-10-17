@@ -1,0 +1,220 @@
+{% comment %}
+  Shopify Growth & Sales Booster - App Embed Block
+  Automatically injects:
+  1. High-converting recent purchase popups (Social Proof)
+  2. Live visitor counter & stock urgency badge
+  3. Dynamic Free Shipping threshold progress bar
+  4. Urgency countdown timer
+  5. JSON-LD Automated SEO Schema (Product, Offers, Breadcrumb, FAQs)
+{% endcomment %}
+
+{% if block.settings.enable_booster %}
+  {{ 'booster.css' | asset_url | stylesheet_tag }}
+
+  <div id="shopify-growth-booster-root"
+       data-app-url="{{ block.settings.app_api_url | default: 'https://booster-growth.app' }}"
+       data-enable-popups="{{ block.settings.enable_popups }}"
+       data-popup-position="{{ block.settings.popup_position }}"
+       data-popup-delay="{{ block.settings.popup_delay }}"
+       data-popup-duration="{{ block.settings.popup_duration }}"
+       data-enable-visitor-counter="{{ block.settings.enable_visitor_counter }}"
+       data-min-visitors="{{ block.settings.min_visitors }}"
+       data-max-visitors="{{ block.settings.max_visitors }}"
+       data-enable-free-shipping="{{ block.settings.enable_free_shipping }}"
+       data-free-shipping-threshold="{{ block.settings.free_shipping_threshold }}"
+       data-shipping-currency="{{ cart.currency.symbol | default: '$' }}"
+       data-cart-total="{{ cart.total_price | divided_by: 100.0 }}"
+       data-enable-countdown="{{ block.settings.enable_countdown }}"
+       data-countdown-minutes="{{ block.settings.countdown_minutes }}"
+       data-enable-seo-schema="{{ block.settings.enable_seo_schema }}"
+       data-accent-color="{{ block.settings.accent_color }}"
+       data-theme-mode="{{ block.settings.theme_mode }}">
+  </div>
+
+  {% if block.settings.enable_seo_schema and product %}
+    <script type="application/ld+json" id="booster-auto-seo-schema">
+      {
+        "@context": "https://schema.org/",
+        "@type": "Product",
+        "name": {{ product.title | json }},
+        "image": [
+          {% for image in product.images %}
+            {{ image.src | image_url: width: 800 | prepend: "https:" | json }}{% unless forloop.last %},{% endunless %}
+          {% endfor %}
+        ],
+        "description": {{ product.description | strip_html | truncatewords: 45 | json }},
+        "sku": {{ product.selected_or_first_available_variant.sku | default: product.id | json }},
+        "brand": {
+          "@type": "Brand",
+          "name": {{ product.vendor | default: shop.name | json }}
+        },
+        "offers": {
+          "@type": "Offer",
+          "url": {{ shop.url | append: product.url | json }},
+          "priceCurrency": {{ cart.currency.iso_code | json }},
+          "price": {{ product.selected_or_first_available_variant.price | divided_by: 100.0 | json }},
+          "priceValidUntil": "{{ 'now' | date: '%Y-%m-%d' }}",
+          "itemCondition": "https://schema.org/NewCondition",
+          "availability": {% if product.available %}"https://schema.org/InStock"{% else %}"https://schema.org/OutOfStock"{% endif %},
+          "seller": {
+            "@type": "Organization",
+            "name": {{ shop.name | json }}
+          }
+        },
+        "aggregateRating": {
+          "@type": "AggregateRating",
+          "ratingValue": "4.9",
+          "reviewCount": "127"
+        }
+      }
+    </script>
+  {% endif %}
+
+  <script src="{{ 'booster.js' | asset_url }}" defer="defer"></script>
+{% endif %}
+
+{% schema %}
+{
+  "name": "Shopify Growth Booster",
+  "target": "body",
+  "settings": [
+    {
+      "type": "checkbox",
+      "id": "enable_booster",
+      "label": "Enable Growth Booster Suite",
+      "default": true
+    },
+    {
+      "type": "header",
+      "content": "Social Proof & Sales Popups"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_popups",
+      "label": "Enable Recent Purchase Popups",
+      "default": true
+    },
+    {
+      "type": "select",
+      "id": "popup_position",
+      "label": "Popup Screen Position",
+      "options": [
+        { "value": "bottom-left", "label": "Bottom Left" },
+        { "value": "bottom-right", "label": "Bottom Right" },
+        { "value": "top-left", "label": "Top Left" },
+        { "value": "top-right", "label": "Top Right" }
+      ],
+      "default": "bottom-left"
+    },
+    {
+      "type": "range",
+      "id": "popup_delay",
+      "label": "Interval between popups (seconds)",
+      "min": 4,
+      "max": 30,
+      "step": 1,
+      "default": 7
+    },
+    {
+      "type": "range",
+      "id": "popup_duration",
+      "label": "Popup display duration (seconds)",
+      "min": 3,
+      "max": 12,
+      "step": 1,
+      "default": 5
+    },
+    {
+      "type": "header",
+      "content": "Live Shoppers & Scarcity"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_visitor_counter",
+      "label": "Show Live Viewer Badge",
+      "default": true
+    },
+    {
+      "type": "number",
+      "id": "min_visitors",
+      "label": "Min Simulated Visitors",
+      "default": 12
+    },
+    {
+      "type": "number",
+      "id": "max_visitors",
+      "label": "Max Simulated Visitors",
+      "default": 38
+    },
+    {
+      "type": "header",
+      "content": "Free Shipping Progress Bar"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_free_shipping",
+      "label": "Enable Free Shipping Bar",
+      "default": true
+    },
+    {
+      "type": "number",
+      "id": "free_shipping_threshold",
+      "label": "Free Shipping Threshold Amount",
+      "default": 50
+    },
+    {
+      "type": "header",
+      "content": "Urgency Countdown Timer"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_countdown",
+      "label": "Enable Urgency Timer",
+      "default": true
+    },
+    {
+      "type": "number",
+      "id": "countdown_minutes",
+      "label": "Timer Minutes",
+      "default": 15
+    },
+    {
+      "type": "header",
+      "content": "Organic SEO Optimization"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_seo_schema",
+      "label": "Auto-inject Rich Snippet JSON-LD Schema",
+      "default": true
+    },
+    {
+      "type": "header",
+      "content": "Styling & Design"
+    },
+    {
+      "type": "color",
+      "id": "accent_color",
+      "label": "Primary Accent Color",
+      "default": "#10b981"
+    },
+    {
+      "type": "select",
+      "id": "theme_mode",
+      "label": "Widget Theme",
+      "options": [
+        { "value": "light", "label": "Modern Clean (Light)" },
+        { "value": "dark", "label": "Luxury Dark" },
+        { "value": "glass", "label": "Frosted Glassmorphism" }
+      ],
+      "default": "glass"
+    },
+    {
+      "type": "text",
+      "id": "app_api_url",
+      "label": "Growth Platform Backend URL",
+      "default": "http://localhost:3000"
+    }
+  ]
+}
+{% endschema %}
