@@ -107,6 +107,18 @@ async function startServer() {
   app.use(cors());
   app.use(express.json());
 
+  // Allow embedding inside Shopify Admin iframe
+  app.use((req, res, next) => {
+    res.removeHeader('X-Frame-Options');
+    const shop = req.query.shop;
+    if (shop) {
+      res.setHeader('Content-Security-Policy', `frame-ancestors https://${shop} https://admin.shopify.com https://*.myshopify.com;`);
+    } else {
+      res.setHeader('Content-Security-Policy', `frame-ancestors https://admin.shopify.com https://*.myshopify.com 'self';`);
+    }
+    next();
+  });
+
   // Serve theme extension static assets directly
   app.use('/extensions/assets', express.static(path.join(__dirname, '../extensions/booster-extension/assets')));
 

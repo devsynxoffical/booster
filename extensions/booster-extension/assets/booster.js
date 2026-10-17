@@ -45,12 +45,17 @@
     themeMode: rootEl?.dataset.themeMode || 'light'
   };
 
+  // Detect current shop domain accurately from Shopify global, script tag, or hostname
+  const detectedShop = (window.Shopify && window.Shopify.shop) 
+    ? window.Shopify.shop 
+    : window.location.hostname.replace(/^www\./, '');
+
   let livePurchases = [];
 
   // Fetch real store orders or real products from the backend API
   if (config.appUrl) {
     try {
-      fetch(`${config.appUrl}/api/public/recent-orders`)
+      fetch(`${config.appUrl}/api/public/recent-orders?shop=${encodeURIComponent(detectedShop)}`)
         .then(res => res.json())
         .then(data => {
           if (Array.isArray(data) && data.length > 0) {
@@ -81,6 +86,7 @@
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
+            shop: detectedShop,
             type: isOrganic ? 'organic_visit' : 'visit',
             referrer: referrer || 'direct',
             url: window.location.href,
@@ -137,8 +143,39 @@
       const card = document.getElementById('booster-active-card');
       const closeBtn = card.querySelector('.booster-close-btn');
 
+      // Record popup impression
+      try {
+        fetch(`${config.appUrl}/api/public/record-event`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            shop: detectedShop,
+            type: 'popup_impression',
+            referrer: 'storefront_popup',
+            url: window.location.href,
+            timestamp: new Date().toISOString()
+          })
+        }).catch(() => {});
+      } catch (e) {}
+
       card.addEventListener('mouseenter', () => { isHovered = true; });
       card.addEventListener('mouseleave', () => { isHovered = false; });
+
+      card.addEventListener('click', () => {
+        try {
+          fetch(`${config.appUrl}/api/public/record-event`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              shop: detectedShop,
+              type: 'popup_click',
+              referrer: 'storefront_popup',
+              url: window.location.href,
+              timestamp: new Date().toISOString()
+            })
+          }).catch(() => {});
+        } catch (e) {}
+      });
 
       closeBtn.addEventListener('click', (e) => {
         e.stopPropagation();

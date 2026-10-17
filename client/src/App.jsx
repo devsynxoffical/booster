@@ -68,20 +68,41 @@ export default function App() {
     themeMode: "light"
   });
 
+  const getUrlShop = () => {
+    try {
+      const params = new URLSearchParams(window.location.search);
+      return params.get('shop') || '';
+    } catch {
+      return '';
+    }
+  };
+
   const refreshAllData = async () => {
     try {
-      const storesRes = await fetch('/api/stores');
+      const shopParam = getUrlShop();
+      const qs = shopParam ? `?shop=${encodeURIComponent(shopParam)}` : '';
+
+      const storesRes = await fetch(`/api/stores${qs}`);
       const sData = await storesRes.json();
       setStoresData(sData);
 
-      const active = sData.stores?.find(s => s.id === sData.activeStoreId) || sData.stores?.[0] || null;
+      let active = null;
+      if (shopParam) {
+        const clean = shopParam.replace(/^https?:\/\//, '').replace(/\/$/, '');
+        active = sData.stores?.find(s => s.shopDomain === clean || s.shopDomain.includes(clean));
+      }
+      if (!active) {
+        active = sData.stores?.find(s => s.id === sData.activeStoreId) || sData.stores?.[0] || null;
+      }
       setActiveStore(active);
 
-      const statsRes = await fetch('/api/stats');
+      const storeQs = active ? `?shop=${encodeURIComponent(active.shopDomain)}` : qs;
+
+      const statsRes = await fetch(`/api/stats${storeQs}`);
       const stData = await statsRes.json();
       setStats(stData);
 
-      const configRes = await fetch('/api/config');
+      const configRes = await fetch(`/api/config${storeQs}`);
       const cfgData = await configRes.json();
       setConfig(cfgData);
     } catch (e) {
@@ -91,17 +112,18 @@ export default function App() {
 
   useEffect(() => {
     refreshAllData();
-    const interval = setInterval(refreshAllData, 10000);
+    const interval = setInterval(refreshAllData, 8000);
     return () => clearInterval(interval);
   }, []);
 
   const handleUpdateConfig = async (newConfig) => {
     setConfig(newConfig);
     try {
-      await fetch('/api/config', {
+      const qs = activeStore ? `?shop=${encodeURIComponent(activeStore.shopDomain)}` : '';
+      await fetch(`/api/config${qs}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(newConfig)
+        body: JSON.stringify({ ...newConfig, shop: activeStore?.shopDomain })
       });
     } catch (e) {
       console.error('Failed to update config:', e);
