@@ -16,7 +16,9 @@ import {
   ChevronDown,
   Lock,
   LogOut,
-  ShieldAlert
+  ShieldAlert,
+  Menu,
+  X
 } from 'lucide-react';
 
 import DashboardView from './components/DashboardView.jsx';
@@ -30,6 +32,7 @@ import ShopifyConnectModal from './components/ShopifyConnectModal.jsx';
 export default function App() {
   const [currentView, setCurrentView] = useState('dashboard');
   const [isConnectModalOpen, setIsConnectModalOpen] = useState(false);
+  const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
   const [storesData, setStoresData] = useState({ activeStoreId: null, stores: [], appConfig: {} });
   const [activeStore, setActiveStore] = useState(null);
 
@@ -308,8 +311,14 @@ export default function App() {
 
   return (
     <div className="app-container">
+      {/* Mobile Drawer Backdrop */}
+      <div 
+        className={`sidebar-backdrop ${isMobileSidebarOpen ? 'active' : ''}`} 
+        onClick={() => setIsMobileSidebarOpen(false)} 
+      />
+
       {/* Sidebar */}
-      <aside className="sidebar">
+      <aside className={`sidebar ${isMobileSidebarOpen ? 'mobile-open' : ''}`}>
         <div className="sidebar-header">
           <div className="brand-badge">
             <div className="brand-icon">
@@ -387,7 +396,7 @@ export default function App() {
 
           <div 
             className={`nav-item ${currentView === 'dashboard' ? 'active' : ''}`}
-            onClick={() => setCurrentView('dashboard')}
+            onClick={() => { setCurrentView('dashboard'); setIsMobileSidebarOpen(false); }}
           >
             <TrendingUp size={16} className="nav-icon" />
             <span>Dashboard</span>
@@ -396,7 +405,7 @@ export default function App() {
           {!isMerchantMode && (
             <div 
               className="nav-item"
-              onClick={() => setIsConnectModalOpen(true)}
+              onClick={() => { setIsConnectModalOpen(true); setIsMobileSidebarOpen(false); }}
               style={{ cursor: 'pointer' }}
             >
               <Store size={16} className="nav-icon" />
@@ -411,7 +420,7 @@ export default function App() {
 
           <div 
             className={`nav-item ${currentView === 'seo' ? 'active' : ''}`}
-            onClick={() => setCurrentView('seo')}
+            onClick={() => { setCurrentView('seo'); setIsMobileSidebarOpen(false); }}
           >
             <Search size={16} className="nav-icon" />
             <span>Organic SEO</span>
@@ -419,7 +428,7 @@ export default function App() {
 
           <div 
             className={`nav-item ${currentView === 'widgets' ? 'active' : ''}`}
-            onClick={() => setCurrentView('widgets')}
+            onClick={() => { setCurrentView('widgets'); setIsMobileSidebarOpen(false); }}
           >
             <ShoppingBag size={16} className="nav-icon" />
             <span>CRO Widgets</span>
@@ -427,7 +436,7 @@ export default function App() {
 
           <div 
             className={`nav-item ${currentView === 'social' ? 'active' : ''}`}
-            onClick={() => setCurrentView('social')}
+            onClick={() => { setCurrentView('social'); setIsMobileSidebarOpen(false); }}
           >
             <Share2 size={16} className="nav-icon" />
             <span>Social Syndication</span>
@@ -437,7 +446,7 @@ export default function App() {
 
           <div 
             className={`nav-item ${currentView === 'simulator' ? 'active' : ''}`}
-            onClick={() => setCurrentView('simulator')}
+            onClick={() => { setCurrentView('simulator'); setIsMobileSidebarOpen(false); }}
           >
             <BarChart2 size={16} className="nav-icon" />
             <span>Store Simulator</span>
@@ -447,7 +456,7 @@ export default function App() {
           {!isMerchantMode && (
             <div 
               className={`nav-item ${currentView === 'guide' ? 'active' : ''}`}
-              onClick={() => setCurrentView('guide')}
+              onClick={() => { setCurrentView('guide'); setIsMobileSidebarOpen(false); }}
             >
               <BookOpen size={16} className="nav-icon" />
               <span>Go Live Guide</span>
@@ -478,14 +487,24 @@ export default function App() {
       <div className="main-wrapper">
         {/* Top Navbar */}
         <header className="top-navbar">
-          <div className="breadcrumbs">
-            <span className="crumb-muted">Workspace</span>
-            <span className="crumb-separator">›</span>
-            <span className="crumb-active">{getBreadcrumbTitle()}</span>
-            <span className="crumb-separator">›</span>
-            <span style={{ fontSize: '12px', background: '#eff6ff', color: '#2563eb', padding: '2px 8px', borderRadius: '4px', fontWeight: 600 }}>
-              {currentStoreDisplayName}
-            </span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <button 
+              className="mobile-menu-btn" 
+              onClick={() => setIsMobileSidebarOpen(!isMobileSidebarOpen)}
+              aria-label="Toggle navigation"
+            >
+              <Menu size={18} />
+            </button>
+
+            <div className="breadcrumbs">
+              <span className="crumb-muted">Workspace</span>
+              <span className="crumb-separator">›</span>
+              <span className="crumb-active">{getBreadcrumbTitle()}</span>
+              <span className="crumb-separator">›</span>
+              <span style={{ fontSize: '12px', background: '#eff6ff', color: '#2563eb', padding: '2px 8px', borderRadius: '4px', fontWeight: 600 }}>
+                {currentStoreDisplayName}
+              </span>
+            </div>
           </div>
 
           <div className="top-nav-actions">

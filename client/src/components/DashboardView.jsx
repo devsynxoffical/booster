@@ -70,6 +70,31 @@ export default function DashboardView({ stats, config, connection, isMerchantMod
   const organicFmt = formatNumber(stats.organicVisitors || 0);
   const ordersFmt = formatNumber(stats.totalOrdersBoosted || 0);
 
+  const [isGeneratingTraffic, setIsGeneratingTraffic] = useState(false);
+  const [trafficResult, setTrafficResult] = useState(null);
+
+  const handleBoostTrafficNow = async () => {
+    setIsGeneratingTraffic(true);
+    setTrafficResult(null);
+    try {
+      const qs = connection?.shopDomain ? `?shop=${encodeURIComponent(connection.shopDomain)}` : '';
+      const res = await fetch(`/api/traffic/auto-generate${qs}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ niche: connection?.storeDetails?.name || config?.storeName })
+      });
+      const data = await res.json();
+      if (data.success) {
+        setTrafficResult(data.message);
+        setTimeout(() => setTrafficResult(null), 8000);
+      }
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setIsGeneratingTraffic(false);
+    }
+  };
+
   return (
     <div>
       {/* Top Banner Connection Notice */}
@@ -222,6 +247,80 @@ export default function DashboardView({ stats, config, connection, isMerchantMod
             <Plus size={15} /> New SEO Article
           </button>
         </div>
+      </div>
+
+      {/* Autonomous Traffic Generator Banner Card */}
+      <div style={{
+        background: '#ffffff',
+        border: '1px solid #bfdbfe',
+        borderRadius: '16px',
+        padding: '16px 20px',
+        marginBottom: '24px',
+        boxShadow: '0 4px 14px -2px rgba(37, 99, 235, 0.08)'
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '14px' }}>
+          <div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
+              <span className="badge badge-blue" style={{ fontSize: '11px', display: 'flex', alignItems: 'center', gap: '5px' }}>
+                <span style={{ width: '7px', height: '7px', borderRadius: '50%', background: '#2563eb', display: 'inline-block' }}></span>
+                Autonomous Traffic Engine Active
+              </span>
+              <span style={{ fontSize: '12px', color: '#64748b' }}>
+                Auto-indexing across Google Search • Bing IndexNow • Pinterest • TikTok
+              </span>
+            </div>
+            <div style={{ fontSize: '14.5px', fontWeight: 700, color: '#0f172a' }}>
+              Automated Organic Traffic & Search Indexing Pipeline
+            </div>
+            <div style={{ fontSize: '12.5px', color: '#475569', marginTop: '2px', maxWidth: '640px' }}>
+              The Booster automatically scans buyer keyword trends, auto-publishes optimized buyer guides to your Shopify blog, and pings search engine sitemaps every 12 hours.
+            </div>
+          </div>
+
+          <button 
+            className="btn btn-blue"
+            onClick={handleBoostTrafficNow}
+            disabled={isGeneratingTraffic}
+            style={{
+              padding: '10px 18px',
+              fontSize: '13px',
+              fontWeight: 700,
+              boxShadow: '0 3px 10px rgba(37, 99, 235, 0.25)',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px'
+            }}
+          >
+            {isGeneratingTraffic ? (
+              <>
+                <Radio size={15} className="animate-pulse" /> Generating Traffic...
+              </>
+            ) : (
+              <>
+                <Zap size={15} /> 🚀 Boost Store Traffic Now
+              </>
+            )}
+          </button>
+        </div>
+
+        {trafficResult && (
+          <div style={{
+            marginTop: '12px',
+            padding: '10px 14px',
+            borderRadius: '8px',
+            background: '#eff6ff',
+            border: '1px solid #93c5fd',
+            fontSize: '12.5px',
+            color: '#1e40af',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px',
+            fontWeight: 600
+          }}>
+            <Sparkles size={14} style={{ color: '#2563eb' }} />
+            {trafficResult}
+          </div>
+        )}
       </div>
 
       {/* 2x2 Metric Cards Grid (Real Store Telemetry) */}

@@ -864,11 +864,123 @@ input:checked + .slider:before {
   border: 1px solid #e2e8f0;
 }
 
+/* Mobile Responsive Overhaul */
+.mobile-menu-btn {
+  display: none;
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 6px 9px;
+  cursor: pointer;
+  color: var(--text-main);
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s ease;
+}
+.mobile-menu-btn:hover {
+  background: var(--bg-subtle);
+}
+
+.sidebar-backdrop {
+  display: none;
+}
+
 @media (max-width: 1024px) {
   .metrics-grid-2x2 {
     grid-template-columns: 1fr;
   }
   .regions-grid {
     grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .mobile-menu-btn {
+    display: inline-flex;
+  }
+
+  .sidebar {
+    position: fixed;
+    top: 0;
+    left: -280px;
+    height: 100vh;
+    z-index: 999999;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.25);
+    transition: left 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .sidebar.mobile-open {
+    left: 0;
+  }
+
+  .sidebar-backdrop.active {
+    display: block;
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.45);
+    backdrop-filter: blur(2px);
+    z-index: 999998;
+  }
+
+  .main-wrapper {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .top-navbar {
+    padding: 10px 14px;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .breadcrumbs {
+    font-size: 11px;
+    max-width: 100%;
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+
+  .top-nav-actions {
+    margin-left: auto;
+    gap: 8px;
+  }
+
+  .main-content {
+    padding: 16px 12px;
+  }
+
+  .page-header-wrap {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .page-title {
+    font-size: 20px;
+  }
+
+  .kpi-card {
+    padding: 16px;
+  }
+
+  .card {
+    padding: 16px 14px;
+  }
+
+  .card-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .form-group input,
+  .form-group select {
+    font-size: 14px;
+  }
+
+  .modal-container {
+    max-width: 98% !important;
+    max-height: 94vh !important;
+    border-radius: 14px !important;
   }
 }
