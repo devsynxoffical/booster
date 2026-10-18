@@ -95,7 +95,8 @@ export default function App() {
       const shopParam = getUrlShop();
       const qs = shopParam ? `?shop=${encodeURIComponent(shopParam)}` : '';
 
-      const storesRes = await fetch(`/api/stores${qs}`);
+      const ts = Date.now();
+      const storesRes = await fetch(`/api/stores${qs ? qs + '&' : '?'}_t=${ts}`, { cache: 'no-store' });
       const sData = await storesRes.json();
       setStoresData(sData);
 
@@ -111,11 +112,11 @@ export default function App() {
 
       const storeQs = active ? `?shop=${encodeURIComponent(active.shopDomain)}` : qs;
 
-      const statsRes = await fetch(`/api/stats${storeQs}`);
+      const statsRes = await fetch(`/api/stats${storeQs ? storeQs + '&' : '?'}_t=${ts}`, { cache: 'no-store' });
       const stData = await statsRes.json();
       setStats(stData);
 
-      const configRes = await fetch(`/api/config${storeQs}`);
+      const configRes = await fetch(`/api/config${storeQs ? storeQs + '&' : '?'}_t=${ts}`, { cache: 'no-store' });
       const cfgData = await configRes.json();
       setConfig(cfgData);
     } catch (e) {

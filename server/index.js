@@ -124,6 +124,15 @@ async function startServer() {
 
   app.use(express.json());
 
+  // Prevent caching of all dynamic API responses (forces live real-time metrics)
+  app.use('/api', (req, res, next) => {
+    res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0');
+    res.setHeader('Pragma', 'no-cache');
+    res.setHeader('Expires', '0');
+    res.setHeader('Surrogate-Control', 'no-store');
+    next();
+  });
+
   // Allow embedding inside Shopify Admin iframe
   app.use((req, res, next) => {
     res.removeHeader('X-Frame-Options');
