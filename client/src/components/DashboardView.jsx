@@ -363,7 +363,7 @@ export default function DashboardView({ stats, config, connection, isMerchantMod
               <span style={{ fontSize: '12px', fontWeight: 600, color: '#475569' }}>Target Page:</span>
               <input
                 type="text"
-                value={targetPagePathInput}
+                value={targetPathInput}
                 onChange={(e) => setTargetPathInput(e.target.value)}
                 placeholder="/ or /products/..."
                 style={{
