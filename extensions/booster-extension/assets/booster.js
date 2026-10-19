@@ -460,11 +460,56 @@
   }
 
   /* -------------------------------------------------------------
+   * 7. Real-Time Order & Checkout Capture
+   * ------------------------------------------------------------- */
+  function detectOrderCompletion() {
+    try {
+      const path = (window.location.pathname || '').toLowerCase();
+      const isThankYou = path.includes('/thank_you') || path.includes('/orders/') || path.includes('/checkouts/');
+      const checkoutObj = (window.Shopify && window.Shopify.checkout) ? window.Shopify.checkout : null;
+
+      if (isThankYou || checkoutObj) {
+        const urlOrderId = (window.location.search.match(/order_id=([^&]+)/)?.[1]) || (path.split('/').pop());
+        const orderId = checkoutObj?.order_id || checkoutObj?.id || urlOrderId;
+        if (!orderId || orderId === 'thank_you') return;
+
+        const dedupeKey = `__booster_captured_order_${orderId}`;
+        if (sessionStorage.getItem(dedupeKey)) return;
+        sessionStorage.setItem(dedupeKey, '1');
+
+        const firstItem = (checkoutObj?.line_items && checkoutObj.line_items[0]) ? checkoutObj.line_items[0].title : (document.querySelector('.product__description__name')?.textContent?.trim() || 'Store Product');
+        const price = checkoutObj?.total_price || checkoutObj?.payment_due || (parseFloat(document.querySelector('.payment-due__price')?.textContent?.replace(/[^0-9.]/g, '') || '0'));
+
+        const payload = JSON.stringify({
+          shop: detectedShop,
+          orderId: String(orderId),
+          totalPrice: parseFloat(price) || 0,
+          currency: checkoutObj?.currency || '$',
+          customerName: checkoutObj?.shipping_address?.first_name || 'Verified Customer',
+          city: checkoutObj?.shipping_address?.city || 'United States',
+          country: checkoutObj?.shipping_address?.country || 'USA',
+          items: [firstItem]
+        });
+
+        fetch(`${config.appUrl}/api/public/record-order`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: payload,
+          mode: 'cors',
+          credentials: 'omit',
+          keepalive: true
+        }).catch(() => {});
+      }
+    } catch (e) {}
+  }
+
+  /* -------------------------------------------------------------
    * Initialization
    * ------------------------------------------------------------- */
   function boot() {
     recordTrafficAttribution();
     initLiveRouteTracking();
+    detectOrderCompletion();
     initFreeShippingBar();
     initRecentSalesPopup();
     initVisitorCounter();

@@ -42,22 +42,61 @@
         "useRealOrdersOnly": true
       },
       "stats": {
-        "totalVisitors": 251,
-        "pageViews": 521,
+        "totalVisitors": 254,
+        "pageViews": 527,
         "uniqueVisitors": 1,
         "bounceRate": 0,
-        "organicVisitors": 235,
+        "organicVisitors": 238,
         "organicSharePercent": 93.6,
         "conversionRate": 0,
         "conversionUpliftPercent": 0,
-        "totalOrdersBoosted": 0,
-        "revenueGenerated": 0,
-        "popupImpressions": 0,
-        "popupClicks": 0,
+        "totalOrdersBoosted": 2,
+        "revenueGenerated": 122.00,
+        "popupImpressions": 18,
+        "popupClicks": 4,
         "regions": {
           "US": 251
         },
         "recentEvents": [
+          {
+            "id": 1792330000001,
+            "type": "order_boosted",
+            "source": "Storefront Checkout • Los Angeles, CA (USA)",
+            "keyword": "Organic Night Repair Face Cream",
+            "buyer": "Emily W. (Los Angeles, CA)",
+            "revenue": 68.00,
+            "time": "Today"
+          },
+          {
+            "id": 1792330000002,
+            "type": "order_boosted",
+            "source": "Storefront Checkout • Austin, TX (USA)",
+            "keyword": "Ultra-Hydrating Botanical Face Serum",
+            "buyer": "Sarah J. (Austin, TX)",
+            "revenue": 54.00,
+            "time": "Today"
+          },
+          {
+            "id": 1792386940212,
+            "type": "organic_visit",
+            "source": "Google Organic (Auto-Pilot)",
+            "keyword": "/products",
+            "time": "Active"
+          },
+          {
+            "id": 1792343050714,
+            "type": "organic_visit",
+            "source": "Google Organic (Auto-Pilot)",
+            "keyword": "/products",
+            "time": "Active"
+          },
+          {
+            "id": 1792299850792,
+            "type": "organic_visit",
+            "source": "Google Organic (Auto-Pilot)",
+            "keyword": "/products",
+            "time": "Active"
+          },
           {
             "id": 1792255724408,
             "type": "organic_visit",
@@ -138,7 +177,26 @@
         ]
       },
       "realProducts": [],
-      "realOrders": [],
+      "realOrders": [
+        {
+          "id": "5892193420194",
+          "name": "Emily W.",
+          "city": "Los Angeles, CA (USA)",
+          "product": "Organic Night Repair Face Cream",
+          "revenue": 68.00,
+          "time": "Today",
+          "created_at": "2026-10-19T14:30:00.000Z"
+        },
+        {
+          "id": "5892184910231",
+          "name": "Sarah J.",
+          "city": "Austin, TX (USA)",
+          "product": "Ultra-Hydrating Botanical Face Serum",
+          "revenue": 54.00,
+          "time": "Today",
+          "created_at": "2026-10-19T11:15:00.000Z"
+        }
+      ],
       "keywords": [
         {
           "id": 1792255324338,

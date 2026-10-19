@@ -1051,6 +1051,54 @@ Available at ${store.storeName}. Handcrafted with premium ingredients and 5-star
     res.json({ ok: true });
   });
 
+  // Storefront live order capture (captures real orders directly on order completion)
+  app.post('/api/public/record-order', (req, res) => {
+    const { shop, orderId, totalPrice, currency, customerName, city, country, items } = req.body;
+    const data = loadData();
+    const store = resolveStore(data, req);
+
+    if (store && orderId) {
+      if (!store.realOrders) store.realOrders = [];
+
+      const cleanOrderId = String(orderId);
+      const existing = store.realOrders.find(o => String(o.id) === cleanOrderId);
+
+      if (!existing) {
+        const price = parseFloat(totalPrice || 0);
+        const buyer = customerName || 'Verified Buyer';
+        const location = city ? `${city}, ${country || 'USA'}` : 'United States (US)';
+        const firstProduct = (items && items[0]) ? items[0] : 'Store Product';
+
+        store.realOrders.unshift({
+          id: cleanOrderId,
+          name: buyer,
+          city: location,
+          product: firstProduct,
+          revenue: price,
+          time: 'Just now',
+          created_at: new Date().toISOString()
+        });
+
+        store.stats.totalOrdersBoosted += 1;
+        store.stats.revenueGenerated = parseFloat((store.stats.revenueGenerated + price).toFixed(2));
+
+        store.stats.recentEvents.unshift({
+          id: Date.now(),
+          type: 'order_boosted',
+          product: firstProduct,
+          revenue: price,
+          buyer: `${buyer} (${location})`,
+          time: 'Just now'
+        });
+        if (store.stats.recentEvents.length > 25) store.stats.recentEvents.pop();
+
+        saveData(data);
+      }
+    }
+
+    res.json({ ok: true, stats: store ? store.stats : null });
+  });
+
   // Webhook Receiver for live store order creation (multi-tenant)
   app.post('/api/webhooks/orders/create', (req, res) => {
     const order = req.body;

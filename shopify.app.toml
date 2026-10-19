@@ -22,5 +22,9 @@ redirect_urls = [
 [webhooks]
 api_version = "2026-01"
 
+  [[webhooks.subscriptions]]
+  topics = [ "orders/create", "orders/paid" ]
+  uri = "https://booster-5imz.onrender.com/api/webhooks/orders/create"
+
 [pos]
 embedded = false
