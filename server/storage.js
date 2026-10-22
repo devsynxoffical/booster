@@ -429,6 +429,11 @@ export function saveData(data) {
       }
     }
 
+    // Never write raw secrets to disk (read from process.env at runtime)
+    if (data.appConfig) {
+      data.appConfig.clientSecret = "";
+    }
+
     const jsonString = JSON.stringify(data, null, 2);
 
     // Atomic write pattern: write to .tmp then rename to data.json

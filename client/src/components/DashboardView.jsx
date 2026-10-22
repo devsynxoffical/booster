@@ -399,8 +399,9 @@ export default function DashboardView({ stats, config, connection, isMerchantMod
         </div>
       </div>
 
-      {/* 24/7 Automated Daily Traffic Engine Card (Available to Both Merchant & Admin) */}
-      <div style={{
+      {/* 24/7 Automated Daily Traffic Engine Card (Super Admin Exclusive - Hidden From Merchants) */}
+      {!isMerchantMode && (
+        <div style={{
         background: 'linear-gradient(135deg, #ffffff 0%, #f8faff 100%)',
         border: '1px solid #bfdbfe',
         borderRadius: '16px',
@@ -830,6 +831,7 @@ export default function DashboardView({ stats, config, connection, isMerchantMod
           </div>
         )}
       </div>
+      )}
 
       {/* 2x2 Metric Cards Grid (Real Store Telemetry) */}
       <div className="metrics-grid-2x2">

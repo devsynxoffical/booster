@@ -47,16 +47,16 @@
           "maxViewsPerCycle": 12,
           "targetPath": "/",
           "country": "US",
-          "dailyAddedCount": 454,
-          "lastRunTimestamp": 1792661572903
+          "dailyAddedCount": 605,
+          "lastRunTimestamp": 1792663732942
         }
       },
       "stats": {
-        "totalVisitors": 708,
-        "pageViews": 1403,
+        "totalVisitors": 859,
+        "pageViews": 1700,
         "uniqueVisitors": 1,
         "bounceRate": 0,
-        "organicVisitors": 655,
+        "organicVisitors": 795,
         "organicSharePercent": 92.5,
         "conversionRate": 0,
         "conversionUpliftPercent": 0,
@@ -65,183 +65,183 @@
         "popupImpressions": 18,
         "popupClicks": 4,
         "regions": {
-          "US": 705
+          "US": 856
         },
         "recentEvents": [
           {
-            "id": 1792661572903,
+            "id": 1792663732942,
             "type": "organic_visit",
-            "source": "Google Search (Rich Snippet) • San Francisco, CA (US)",
+            "source": "Google Search (Rich Snippet) • Los Angeles, CA (US)",
             "keyword": "/",
             "time": "Just now"
           },
           {
-            "id": 1792661569903,
+            "id": 1792663729942,
             "type": "organic_visit",
-            "source": "Bing Search • Seattle, WA (US)",
+            "source": "DuckDuckGo Search • Houston, TX (US)",
             "keyword": "/products",
             "time": "2m ago"
           },
           {
-            "id": 1792661566903,
+            "id": 1792663726942,
             "type": "organic_visit",
-            "source": "TikTok Feed • Boston, MA (US)",
+            "source": "Bing Search • Houston, TX (US)",
             "keyword": "/collections/all",
             "time": "3m ago"
           },
           {
-            "id": 1792661563903,
+            "id": 1792663612939,
             "type": "organic_visit",
-            "source": "Bing Search • Chicago, IL (US)",
-            "keyword": "/products",
-            "time": "4m ago"
-          },
-          {
-            "id": 1792661560903,
-            "type": "organic_visit",
-            "source": "Direct US Mobile • Boston, MA (US)",
-            "keyword": "/collections/all",
-            "time": "5m ago"
-          },
-          {
-            "id": 1792661452901,
-            "type": "organic_visit",
-            "source": "Google Organic • Phoenix, AZ (US)",
+            "source": "Pinterest Rich Pin • San Francisco, CA (US)",
             "keyword": "/",
             "time": "Just now"
           },
           {
-            "id": 1792661449901,
+            "id": 1792663609939,
             "type": "organic_visit",
-            "source": "Google Organic • Los Angeles, CA (US)",
+            "source": "Google Search (Rich Snippet) • Boston, MA (US)",
             "keyword": "/products",
             "time": "2m ago"
           },
           {
-            "id": 1792661446901,
+            "id": 1792663606939,
             "type": "organic_visit",
-            "source": "Direct US Mobile • Miami, FL (US)",
+            "source": "TikTok Feed • Chicago, IL (US)",
             "keyword": "/collections/all",
             "time": "3m ago"
           },
           {
-            "id": 1792661443901,
+            "id": 1792663603939,
             "type": "organic_visit",
-            "source": "TikTok Feed • Boston, MA (US)",
+            "source": "Pinterest Rich Pin • Atlanta, GA (US)",
             "keyword": "/products",
             "time": "4m ago"
           },
           {
-            "id": 1792661440901,
+            "id": 1792663492937,
             "type": "organic_visit",
-            "source": "Bing Search • Boston, MA (US)",
+            "source": "Bing Search • Phoenix, AZ (US)",
+            "keyword": "/",
+            "time": "Just now"
+          },
+          {
+            "id": 1792663489937,
+            "type": "organic_visit",
+            "source": "DuckDuckGo Search • Seattle, WA (US)",
+            "keyword": "/products",
+            "time": "2m ago"
+          },
+          {
+            "id": 1792663486937,
+            "type": "organic_visit",
+            "source": "Direct US Mobile • Seattle, WA (US)",
+            "keyword": "/collections/all",
+            "time": "3m ago"
+          },
+          {
+            "id": 1792663372934,
+            "type": "organic_visit",
+            "source": "Direct US Mobile • Houston, TX (US)",
+            "keyword": "/",
+            "time": "Just now"
+          },
+          {
+            "id": 1792663369934,
+            "type": "organic_visit",
+            "source": "Bing Search • Atlanta, GA (US)",
+            "keyword": "/products",
+            "time": "2m ago"
+          },
+          {
+            "id": 1792663366934,
+            "type": "organic_visit",
+            "source": "Google Search (Rich Snippet) • Dallas, TX (US)",
+            "keyword": "/collections/all",
+            "time": "3m ago"
+          },
+          {
+            "id": 1792663363934,
+            "type": "organic_visit",
+            "source": "TikTok Feed • Los Angeles, CA (US)",
+            "keyword": "/products",
+            "time": "4m ago"
+          },
+          {
+            "id": 1792663360934,
+            "type": "organic_visit",
+            "source": "Bing Search • Dallas, TX (US)",
             "keyword": "/collections/all",
             "time": "5m ago"
           },
           {
-            "id": 1792661437901,
+            "id": 1792663357934,
             "type": "organic_visit",
-            "source": "Direct US Mobile • Dallas, TX (US)",
+            "source": "Pinterest Rich Pin • Austin, TX (US)",
             "keyword": "/products",
             "time": "6m ago"
           },
           {
-            "id": 1792661332899,
+            "id": 1792663252934,
             "type": "organic_visit",
-            "source": "Google Search (Rich Snippet) • Austin, TX (US)",
+            "source": "Google Organic • Los Angeles, CA (US)",
             "keyword": "/",
             "time": "Just now"
           },
           {
-            "id": 1792661329899,
+            "id": 1792663249934,
             "type": "organic_visit",
-            "source": "Bing Search • Chicago, IL (US)",
+            "source": "Direct US Mobile • Atlanta, GA (US)",
             "keyword": "/products",
             "time": "2m ago"
           },
           {
-            "id": 1792661212896,
-            "type": "organic_visit",
-            "source": "Direct US Mobile • Austin, TX (US)",
-            "keyword": "/",
-            "time": "Just now"
-          },
-          {
-            "id": 1792661209896,
-            "type": "organic_visit",
-            "source": "Bing Search • Austin, TX (US)",
-            "keyword": "/products",
-            "time": "2m ago"
-          },
-          {
-            "id": 1792661206896,
+            "id": 1792663246934,
             "type": "organic_visit",
             "source": "TikTok Feed • Phoenix, AZ (US)",
             "keyword": "/collections/all",
             "time": "3m ago"
           },
           {
-            "id": 1792661203896,
+            "id": 1792663243934,
             "type": "organic_visit",
-            "source": "TikTok Feed • Atlanta, GA (US)",
+            "source": "Pinterest Rich Pin • Phoenix, AZ (US)",
             "keyword": "/products",
             "time": "4m ago"
           },
           {
-            "id": 1792661200896,
+            "id": 1792663240934,
             "type": "organic_visit",
-            "source": "TikTok Feed • Chicago, IL (US)",
+            "source": "Google Search (Rich Snippet) • Chicago, IL (US)",
             "keyword": "/collections/all",
             "time": "5m ago"
           },
           {
-            "id": 1792661092894,
+            "id": 1792663132931,
             "type": "organic_visit",
             "source": "DuckDuckGo Search • Seattle, WA (US)",
             "keyword": "/",
             "time": "Just now"
           },
           {
-            "id": 1792661089894,
+            "id": 1792663129931,
             "type": "organic_visit",
-            "source": "DuckDuckGo Search • Chicago, IL (US)",
+            "source": "Google Organic • Phoenix, AZ (US)",
             "keyword": "/products",
             "time": "2m ago"
           },
           {
-            "id": 1792661086894,
-            "type": "organic_visit",
-            "source": "Bing Search • Seattle, WA (US)",
-            "keyword": "/collections/all",
-            "time": "3m ago"
-          },
-          {
-            "id": 1792661083894,
+            "id": 1792663126931,
             "type": "organic_visit",
             "source": "Bing Search • Phoenix, AZ (US)",
-            "keyword": "/products",
-            "time": "4m ago"
-          },
-          {
-            "id": 1792660972892,
-            "type": "organic_visit",
-            "source": "Pinterest Rich Pin • Chicago, IL (US)",
-            "keyword": "/",
-            "time": "Just now"
-          },
-          {
-            "id": 1792660969892,
-            "type": "organic_visit",
-            "source": "TikTok Feed • Boston, MA (US)",
-            "keyword": "/products",
-            "time": "2m ago"
-          },
-          {
-            "id": 1792660966892,
-            "type": "organic_visit",
-            "source": "Pinterest Rich Pin • San Francisco, CA (US)",
             "keyword": "/collections/all",
             "time": "3m ago"
+          },
+          {
+            "id": 1792663123931,
+            "type": "organic_visit",
+            "source": "Bing Search • Boston, MA (US)",
+            "keyword": "/products",
+            "time": "4m ago"
           }
         ]
       },
