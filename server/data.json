@@ -47,16 +47,19 @@
           "maxViewsPerCycle": 12,
           "targetPath": "/",
           "country": "US",
-          "dailyAddedCount": 1428,
-          "lastRunTimestamp": 1792683451290
+          "dailyAddedCount": 1508,
+          "anchorTimestamp": 1792660000000,
+          "anchorVisitors": 859,
+          "anchorDailyCount": 605,
+          "lastRunTimestamp": 1792684646910
         }
       },
       "stats": {
-        "totalVisitors": 1682,
-        "pageViews": 3323,
+        "totalVisitors": 1762,
+        "pageViews": 3471,
         "uniqueVisitors": 1,
         "bounceRate": 0,
-        "organicVisitors": 1555,
+        "organicVisitors": 1628,
         "organicSharePercent": 92.4,
         "conversionRate": 0,
         "conversionUpliftPercent": 0,
@@ -65,183 +68,183 @@
         "popupImpressions": 18,
         "popupClicks": 4,
         "regions": {
-          "US": 1679
+          "US": 1759
         },
         "recentEvents": [
           {
-            "id": 1792683451290,
-            "type": "organic_visit",
-            "source": "Pinterest Rich Pin • Atlanta, GA (US)",
-            "keyword": "/",
-            "time": "Just now"
-          },
-          {
-            "id": 1792683448290,
+            "id": 1792684646910,
             "type": "organic_visit",
             "source": "Google Organic • Chicago, IL (US)",
-            "keyword": "/products",
-            "time": "2m ago"
-          },
-          {
-            "id": 1792683445290,
-            "type": "organic_visit",
-            "source": "Google Search (Rich Snippet) • Atlanta, GA (US)",
-            "keyword": "/collections/all",
-            "time": "3m ago"
-          },
-          {
-            "id": 1792683442290,
-            "type": "organic_visit",
-            "source": "TikTok Feed • Dallas, TX (US)",
-            "keyword": "/products",
-            "time": "4m ago"
-          },
-          {
-            "id": 1792683439290,
-            "type": "organic_visit",
-            "source": "Bing Search • New York, NY (US)",
-            "keyword": "/collections/all",
-            "time": "5m ago"
-          },
-          {
-            "id": 1792683436290,
-            "type": "organic_visit",
-            "source": "DuckDuckGo Search • Seattle, WA (US)",
-            "keyword": "/products",
-            "time": "6m ago"
-          },
-          {
-            "id": 1792683331288,
-            "type": "organic_visit",
-            "source": "Direct US Mobile • Los Angeles, CA (US)",
             "keyword": "/",
             "time": "Just now"
           },
           {
-            "id": 1792683328288,
-            "type": "organic_visit",
-            "source": "Direct US Mobile • Seattle, WA (US)",
-            "keyword": "/products",
-            "time": "2m ago"
-          },
-          {
-            "id": 1792683325288,
+            "id": 1792684643910,
             "type": "organic_visit",
             "source": "Pinterest Rich Pin • Chicago, IL (US)",
+            "keyword": "/products",
+            "time": "2m ago"
+          },
+          {
+            "id": 1792684640910,
+            "type": "organic_visit",
+            "source": "Google Organic • Seattle, WA (US)",
             "keyword": "/collections/all",
             "time": "3m ago"
           },
           {
-            "id": 1792683322288,
+            "id": 1792684637910,
             "type": "organic_visit",
-            "source": "Google Search (Rich Snippet) • Seattle, WA (US)",
+            "source": "Pinterest Rich Pin • San Francisco, CA (US)",
             "keyword": "/products",
             "time": "4m ago"
           },
           {
-            "id": 1792683319288,
+            "id": 1792684634910,
             "type": "organic_visit",
-            "source": "TikTok Feed • Atlanta, GA (US)",
+            "source": "Pinterest Rich Pin • Austin, TX (US)",
             "keyword": "/collections/all",
             "time": "5m ago"
           },
           {
-            "id": 1792683316288,
+            "id": 1792684631910,
             "type": "organic_visit",
-            "source": "Google Search (Rich Snippet) • Boston, MA (US)",
+            "source": "Bing Search • Los Angeles, CA (US)",
             "keyword": "/products",
             "time": "6m ago"
           },
           {
-            "id": 1792683211287,
-            "type": "organic_visit",
-            "source": "Google Organic • Miami, FL (US)",
-            "keyword": "/",
-            "time": "Just now"
-          },
-          {
-            "id": 1792683208287,
-            "type": "organic_visit",
-            "source": "Google Organic • Dallas, TX (US)",
-            "keyword": "/products",
-            "time": "2m ago"
-          },
-          {
-            "id": 1792683091284,
-            "type": "organic_visit",
-            "source": "Bing Search • Boston, MA (US)",
-            "keyword": "/",
-            "time": "Just now"
-          },
-          {
-            "id": 1792683088284,
-            "type": "organic_visit",
-            "source": "Direct US Mobile • Los Angeles, CA (US)",
-            "keyword": "/products",
-            "time": "2m ago"
-          },
-          {
-            "id": 1792683085284,
-            "type": "organic_visit",
-            "source": "Direct US Mobile • Boston, MA (US)",
-            "keyword": "/collections/all",
-            "time": "3m ago"
-          },
-          {
-            "id": 1792682971282,
+            "id": 1792684526909,
             "type": "organic_visit",
             "source": "Google Search (Rich Snippet) • Atlanta, GA (US)",
             "keyword": "/",
             "time": "Just now"
           },
           {
-            "id": 1792682968282,
+            "id": 1792684523909,
             "type": "organic_visit",
-            "source": "Bing Search • Dallas, TX (US)",
+            "source": "Bing Search • Chicago, IL (US)",
             "keyword": "/products",
             "time": "2m ago"
           },
           {
-            "id": 1792682965282,
+            "id": 1792684520909,
             "type": "organic_visit",
-            "source": "Pinterest Rich Pin • Atlanta, GA (US)",
+            "source": "Direct US Mobile • Chicago, IL (US)",
             "keyword": "/collections/all",
             "time": "3m ago"
           },
           {
-            "id": 1792682962282,
+            "id": 1792684517909,
             "type": "organic_visit",
-            "source": "Direct US Mobile • Dallas, TX (US)",
+            "source": "Pinterest Rich Pin • Chicago, IL (US)",
             "keyword": "/products",
             "time": "4m ago"
           },
           {
-            "id": 1792682851281,
+            "id": 1792684406907,
             "type": "organic_visit",
-            "source": "TikTok Feed • Chicago, IL (US)",
+            "source": "TikTok Feed • Los Angeles, CA (US)",
             "keyword": "/",
             "time": "Just now"
           },
           {
-            "id": 1792682848281,
+            "id": 1792684403907,
             "type": "organic_visit",
-            "source": "Google Search (Rich Snippet) • New York, NY (US)",
+            "source": "Google Organic • San Francisco, CA (US)",
             "keyword": "/products",
             "time": "2m ago"
           },
           {
-            "id": 1792682845281,
+            "id": 1792684400907,
             "type": "organic_visit",
-            "source": "DuckDuckGo Search • New York, NY (US)",
+            "source": "DuckDuckGo Search • Houston, TX (US)",
             "keyword": "/collections/all",
             "time": "3m ago"
           },
           {
-            "id": 1792682842281,
+            "id": 1792684397907,
+            "type": "organic_visit",
+            "source": "Google Organic • Austin, TX (US)",
+            "keyword": "/products",
+            "time": "4m ago"
+          },
+          {
+            "id": 1792684394907,
+            "type": "organic_visit",
+            "source": "Google Search (Rich Snippet) • Phoenix, AZ (US)",
+            "keyword": "/collections/all",
+            "time": "5m ago"
+          },
+          {
+            "id": 1792684286905,
+            "type": "organic_visit",
+            "source": "DuckDuckGo Search • Miami, FL (US)",
+            "keyword": "/",
+            "time": "Just now"
+          },
+          {
+            "id": 1792684283905,
             "type": "organic_visit",
             "source": "Google Organic • Houston, TX (US)",
             "keyword": "/products",
+            "time": "2m ago"
+          },
+          {
+            "id": 1792684280905,
+            "type": "organic_visit",
+            "source": "Google Search (Rich Snippet) • Dallas, TX (US)",
+            "keyword": "/collections/all",
+            "time": "3m ago"
+          },
+          {
+            "id": 1792684277905,
+            "type": "organic_visit",
+            "source": "DuckDuckGo Search • Los Angeles, CA (US)",
+            "keyword": "/products",
             "time": "4m ago"
+          },
+          {
+            "id": 1792684274905,
+            "type": "organic_visit",
+            "source": "Pinterest Rich Pin • Los Angeles, CA (US)",
+            "keyword": "/collections/all",
+            "time": "5m ago"
+          },
+          {
+            "id": 1792684166904,
+            "type": "organic_visit",
+            "source": "TikTok Feed • Dallas, TX (US)",
+            "keyword": "/",
+            "time": "Just now"
+          },
+          {
+            "id": 1792684163904,
+            "type": "organic_visit",
+            "source": "Pinterest Rich Pin • New York, NY (US)",
+            "keyword": "/products",
+            "time": "2m ago"
+          },
+          {
+            "id": 1792684160904,
+            "type": "organic_visit",
+            "source": "TikTok Feed • Houston, TX (US)",
+            "keyword": "/collections/all",
+            "time": "3m ago"
+          },
+          {
+            "id": 1792684157904,
+            "type": "organic_visit",
+            "source": "Google Organic • Miami, FL (US)",
+            "keyword": "/products",
+            "time": "4m ago"
+          },
+          {
+            "id": 1792684046903,
+            "type": "organic_visit",
+            "source": "Direct US Mobile • Chicago, IL (US)",
+            "keyword": "/",
+            "time": "Just now"
           }
         ]
       },

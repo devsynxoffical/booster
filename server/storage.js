@@ -47,6 +47,73 @@ export function recalculateStoreOrders(store) {
   }, 0);
 
   store.stats.revenueGenerated = parseFloat(totalRevenue.toFixed(2));
+
+  // Sync accumulated traffic based on time progression (renders immune to sleep/restarts)
+  syncAutoPilotAccumulatedStats(store);
+}
+
+export function syncAutoPilotAccumulatedStats(store) {
+  if (!store) return;
+  const isUsStore = store.shopDomain?.includes('chandkali') || store.customDomain?.includes('usabeauty');
+  if (!store.settings) store.settings = {};
+  if (!store.stats) store.stats = {};
+
+  if (!store.settings.autoTraffic) {
+    store.settings.autoTraffic = {
+      enabled: true,
+      intervalMinutes: 2,
+      minViewsPerCycle: 5,
+      maxViewsPerCycle: 12,
+      targetPath: "/",
+      country: "US",
+      dailyAddedCount: isUsStore ? 605 : 0,
+      anchorTimestamp: 1792660000000,
+      anchorVisitors: isUsStore ? 859 : 0,
+      anchorDailyCount: isUsStore ? 605 : 0,
+      lastRunTimestamp: Date.now()
+    };
+  }
+
+  const cfg = store.settings.autoTraffic;
+  if (!cfg.anchorTimestamp) cfg.anchorTimestamp = 1792660000000;
+  if (!cfg.anchorVisitors) cfg.anchorVisitors = isUsStore ? 859 : (store.stats.totalVisitors || 0);
+  if (cfg.anchorDailyCount === undefined) cfg.anchorDailyCount = isUsStore ? 605 : 0;
+
+  if (cfg.enabled) {
+    const intervalMin = Math.max(1, parseInt(cfg.intervalMinutes, 10) || 2);
+    const avgViews = ((parseInt(cfg.minViewsPerCycle, 10) || 5) + (parseInt(cfg.maxViewsPerCycle, 10) || 12)) / 2;
+    const elapsedMinutes = Math.max(0, (Date.now() - cfg.anchorTimestamp) / 60000);
+    const elapsedCycles = Math.floor(elapsedMinutes / intervalMin);
+    const accruedViews = Math.round(elapsedCycles * avgViews);
+
+    const minFloorVisitors = cfg.anchorVisitors + accruedViews + (cfg.manualBonus || 0);
+    const minFloorDaily = cfg.anchorDailyCount + accruedViews + (cfg.manualBonus || 0);
+
+    if (!store.stats.totalVisitors || store.stats.totalVisitors < minFloorVisitors) {
+      store.stats.totalVisitors = minFloorVisitors;
+    }
+    if (!cfg.dailyAddedCount || cfg.dailyAddedCount < minFloorDaily) {
+      cfg.dailyAddedCount = minFloorDaily;
+    }
+  } else {
+    if (!store.stats.totalVisitors || store.stats.totalVisitors < cfg.anchorVisitors) {
+      store.stats.totalVisitors = cfg.anchorVisitors;
+    }
+  }
+
+  // Realistic pageviews depth
+  const targetPageViews = Math.round((store.stats.totalVisitors || 859) * 1.95);
+  if (!store.stats.pageViews || store.stats.pageViews < targetPageViews) {
+    store.stats.pageViews = targetPageViews;
+  }
+
+  // Organic visitors (92.5%)
+  store.stats.organicVisitors = Math.round((store.stats.totalVisitors || 859) * 0.925);
+  store.stats.organicSharePercent = 92.5;
+
+  // Regions
+  if (!store.stats.regions) store.stats.regions = {};
+  store.stats.regions['US'] = store.stats.totalVisitors;
 }
 
 export const defaultStoreTemplate = (shopDomain, storeName = '') => {
@@ -185,22 +252,25 @@ const initialMultiStoreData = {
         useRealOrdersOnly: true,
         autoTraffic: {
           enabled: true,
-          intervalMinutes: 5,
-          minViewsPerCycle: 2,
-          maxViewsPerCycle: 8,
+          intervalMinutes: 2,
+          minViewsPerCycle: 5,
+          maxViewsPerCycle: 12,
           targetPath: "/",
           country: "US",
-          dailyAddedCount: 0,
+          dailyAddedCount: 605,
+          anchorTimestamp: 1792660000000,
+          anchorVisitors: 859,
+          anchorDailyCount: 605,
           lastRunTimestamp: Date.now()
         }
       },
       stats: {
-        totalVisitors: 254,
-        pageViews: 527,
+        totalVisitors: 859,
+        pageViews: 1720,
         uniqueVisitors: 1,
         bounceRate: 0,
-        organicVisitors: 238,
-        organicSharePercent: 93.6,
+        organicVisitors: 795,
+        organicSharePercent: 92.5,
         conversionRate: 0,
         conversionUpliftPercent: 0,
         totalOrdersBoosted: 2,
@@ -208,7 +278,7 @@ const initialMultiStoreData = {
         popupImpressions: 18,
         popupClicks: 4,
         regions: {
-          US: 251
+          US: 856
         },
         recentEvents: [
           {
@@ -319,20 +389,22 @@ export function loadData() {
       if (Array.isArray(parsed.stores) && parsed.stores.length > 0) {
         for (const store of parsed.stores) {
           recalculateStoreOrders(store);
+          syncAutoPilotAccumulatedStats(store);
+
           // Safety guard: ensure active store views and baseline stats never reset to zero
           const isUsStore = store.shopDomain?.includes('chandkali') || store.customDomain?.includes('usabeauty');
           if (isUsStore) {
-            if (!store.stats.totalVisitors || store.stats.totalVisitors < 254) {
-              store.stats.totalVisitors = 254;
+            if (!store.stats.totalVisitors || store.stats.totalVisitors < 859) {
+              store.stats.totalVisitors = 859;
             }
-            if (!store.stats.pageViews || store.stats.pageViews < 527) {
-              store.stats.pageViews = 527;
+            if (!store.stats.pageViews || store.stats.pageViews < 1720) {
+              store.stats.pageViews = 1720;
             }
-            if (!store.stats.organicVisitors || store.stats.organicVisitors < 238) {
-              store.stats.organicVisitors = 238;
+            if (!store.stats.organicVisitors || store.stats.organicVisitors < 795) {
+              store.stats.organicVisitors = 795;
             }
             if (!store.stats.regions || Object.keys(store.stats.regions).length === 0) {
-              store.stats.regions = { US: 251 };
+              store.stats.regions = { US: 856 };
             }
             if (!store.realOrders || store.realOrders.length === 0) {
               store.realOrders = [
