@@ -610,7 +610,7 @@ export default function App() {
           )}
 
           {currentView === 'seo' && (
-            <SeoEngineView isMerchantMode={isMerchantMode} />
+            <SeoEngineView isMerchantMode={isMerchantMode} activeStore={activeStore} />
           )}
 
           {currentView === 'widgets' && (
@@ -621,7 +621,7 @@ export default function App() {
           )}
 
           {currentView === 'social' && (
-            <SocialSyndicationView />
+            <SocialSyndicationView activeStore={activeStore} />
           )}
 
           {currentView === 'guide' && (

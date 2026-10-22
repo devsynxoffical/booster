@@ -12,17 +12,28 @@ import {
   Loader2
 } from 'lucide-react';
 
-export default function SocialSyndicationView() {
-  const [productName, setProductName] = useState('Wireless Noise-Cancelling Earbuds');
+export default function SocialSyndicationView({ activeStore }) {
+  const currentShop = activeStore?.shopDomain || (typeof window !== 'undefined' ? new URLSearchParams(window.location.search).get('shop') || '' : '');
+  const storeProducts = activeStore?.realProducts || [];
+  const defaultProduct = storeProducts.length > 0 ? storeProducts[0].title : 'Organic Night Repair Face Cream';
+
+  const [productName, setProductName] = useState(defaultProduct);
   const [platform, setPlatform] = useState('Pinterest');
   const [syndicationResult, setSyndicationResult] = useState({
-    pinTitle: 'Aesthetic Must-Haves: Wireless Noise-Cancelling Earbuds',
-    pinDescription: 'Upgrade your daily focus with these sleek, durable earbuds with 40hr battery life and active noise cancelling. Tap to shop with free shipping!',
+    pinTitle: `Aesthetic Must-Haves: ${defaultProduct}`,
+    pinDescription: `Upgrade your daily focus with ${defaultProduct}. Formulated with verified premium quality, fast tracked delivery, and 5-star buyer ratings. Tap to shop with free shipping!`,
     board: 'Modern Aesthetic & Daily Essentials',
-    tags: ['#aesthetictech', '#minimalistdesk', '#noisecancelling', '#wfhgear']
+    tags: ['#aestheticfinds', '#shopifymusthaves', '#curatedessentials', '#viralproducts']
   });
   const [isGenerating, setIsGenerating] = useState(false);
   const [copied, setCopied] = useState(false);
+
+  // Sync default product when activeStore changes
+  React.useEffect(() => {
+    if (storeProducts.length > 0 && !storeProducts.some(p => p.title === productName)) {
+      setProductName(storeProducts[0].title);
+    }
+  }, [activeStore]);
 
   const handleGenerate = async (targetPlatform = platform) => {
     setIsGenerating(true);
@@ -31,7 +42,11 @@ export default function SocialSyndicationView() {
       const res = await fetch('/api/social/generate-post', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ platform: targetPlatform, productName })
+        body: JSON.stringify({ 
+          platform: targetPlatform, 
+          productName,
+          shop: currentShop
+        })
       });
       const data = await res.json();
       if (data.syndication) {
@@ -72,17 +87,26 @@ export default function SocialSyndicationView() {
           </div>
 
           <div className="form-group">
-            <label className="form-label">Select Store Product</label>
-            <select 
-              className="form-select"
-              value={productName}
-              onChange={(e) => setProductName(e.target.value)}
-            >
-              <option value="Wireless Noise-Cancelling Earbuds">Wireless Noise-Cancelling Earbuds</option>
-              <option value="Minimalist Leather Cardholder">Minimalist Leather Cardholder</option>
-              <option value="Botanical Face Serum">Botanical Face Serum</option>
-              <option value="Ergonomic Laptop Stand">Ergonomic Laptop Stand</option>
-            </select>
+            <label className="form-label">Store Product to Promote</label>
+            {storeProducts.length > 0 ? (
+              <select 
+                className="form-select"
+                value={productName}
+                onChange={(e) => setProductName(e.target.value)}
+              >
+                {storeProducts.map(p => (
+                  <option key={p.id} value={p.title}>{p.title}</option>
+                ))}
+              </select>
+            ) : (
+              <input 
+                type="text"
+                className="form-input"
+                value={productName}
+                onChange={(e) => setProductName(e.target.value)}
+                placeholder="e.g. Organic Night Repair Face Cream"
+              />
+            )}
           </div>
 
           <div className="form-group">

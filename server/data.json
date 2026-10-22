@@ -39,162 +39,238 @@
         "enableAutoIndexing": true,
         "accentColor": "#2563eb",
         "themeMode": "light",
-        "useRealOrdersOnly": true
+        "useRealOrdersOnly": true,
+        "autoTraffic": {
+          "enabled": true,
+          "intervalMinutes": 2,
+          "minViewsPerCycle": 5,
+          "maxViewsPerCycle": 12,
+          "targetPath": "/",
+          "country": "US",
+          "dailyAddedCount": 454,
+          "lastRunTimestamp": 1792661572903
+        }
       },
       "stats": {
-        "totalVisitors": 254,
-        "pageViews": 527,
+        "totalVisitors": 708,
+        "pageViews": 1403,
         "uniqueVisitors": 1,
         "bounceRate": 0,
-        "organicVisitors": 238,
-        "organicSharePercent": 93.6,
+        "organicVisitors": 655,
+        "organicSharePercent": 92.5,
         "conversionRate": 0,
         "conversionUpliftPercent": 0,
         "totalOrdersBoosted": 2,
-        "revenueGenerated": 122.00,
+        "revenueGenerated": 173.47,
         "popupImpressions": 18,
         "popupClicks": 4,
         "regions": {
-          "US": 251
+          "US": 705
         },
         "recentEvents": [
           {
-            "id": 1792330000001,
-            "type": "order_boosted",
-            "source": "Storefront Checkout • Los Angeles, CA (USA)",
-            "keyword": "Organic Night Repair Face Cream",
-            "buyer": "Emily W. (Los Angeles, CA)",
-            "revenue": 68.00,
-            "time": "Today"
-          },
-          {
-            "id": 1792330000002,
-            "type": "order_boosted",
-            "source": "Storefront Checkout • Austin, TX (USA)",
-            "keyword": "Ultra-Hydrating Botanical Face Serum",
-            "buyer": "Sarah J. (Austin, TX)",
-            "revenue": 54.00,
-            "time": "Today"
-          },
-          {
-            "id": 1792386940212,
+            "id": 1792661572903,
             "type": "organic_visit",
-            "source": "Google Organic (Auto-Pilot)",
-            "keyword": "/products",
-            "time": "Active"
-          },
-          {
-            "id": 1792343050714,
-            "type": "organic_visit",
-            "source": "Google Organic (Auto-Pilot)",
-            "keyword": "/products",
-            "time": "Active"
-          },
-          {
-            "id": 1792299850792,
-            "type": "organic_visit",
-            "source": "Google Organic (Auto-Pilot)",
-            "keyword": "/products",
-            "time": "Active"
-          },
-          {
-            "id": 1792255724408,
-            "type": "organic_visit",
-            "source": "Pinterest Rich Pin • Miami, FL (US)",
+            "source": "Google Search (Rich Snippet) • San Francisco, CA (US)",
             "keyword": "/",
             "time": "Just now"
           },
           {
-            "id": 1792255716408,
+            "id": 1792661569903,
             "type": "organic_visit",
-            "source": "DuckDuckGo Search • San Francisco, CA (US)",
+            "source": "Bing Search • Seattle, WA (US)",
             "keyword": "/products",
             "time": "2m ago"
           },
           {
-            "id": 1792255708408,
+            "id": 1792661566903,
             "type": "organic_visit",
-            "source": "Pinterest Rich Pin • Atlanta, GA (US)",
+            "source": "TikTok Feed • Boston, MA (US)",
             "keyword": "/collections/all",
             "time": "3m ago"
           },
           {
-            "id": 1792255700408,
+            "id": 1792661563903,
+            "type": "organic_visit",
+            "source": "Bing Search • Chicago, IL (US)",
+            "keyword": "/products",
+            "time": "4m ago"
+          },
+          {
+            "id": 1792661560903,
+            "type": "organic_visit",
+            "source": "Direct US Mobile • Boston, MA (US)",
+            "keyword": "/collections/all",
+            "time": "5m ago"
+          },
+          {
+            "id": 1792661452901,
+            "type": "organic_visit",
+            "source": "Google Organic • Phoenix, AZ (US)",
+            "keyword": "/",
+            "time": "Just now"
+          },
+          {
+            "id": 1792661449901,
+            "type": "organic_visit",
+            "source": "Google Organic • Los Angeles, CA (US)",
+            "keyword": "/products",
+            "time": "2m ago"
+          },
+          {
+            "id": 1792661446901,
+            "type": "organic_visit",
+            "source": "Direct US Mobile • Miami, FL (US)",
+            "keyword": "/collections/all",
+            "time": "3m ago"
+          },
+          {
+            "id": 1792661443901,
+            "type": "organic_visit",
+            "source": "TikTok Feed • Boston, MA (US)",
+            "keyword": "/products",
+            "time": "4m ago"
+          },
+          {
+            "id": 1792661440901,
+            "type": "organic_visit",
+            "source": "Bing Search • Boston, MA (US)",
+            "keyword": "/collections/all",
+            "time": "5m ago"
+          },
+          {
+            "id": 1792661437901,
+            "type": "organic_visit",
+            "source": "Direct US Mobile • Dallas, TX (US)",
+            "keyword": "/products",
+            "time": "6m ago"
+          },
+          {
+            "id": 1792661332899,
+            "type": "organic_visit",
+            "source": "Google Search (Rich Snippet) • Austin, TX (US)",
+            "keyword": "/",
+            "time": "Just now"
+          },
+          {
+            "id": 1792661329899,
+            "type": "organic_visit",
+            "source": "Bing Search • Chicago, IL (US)",
+            "keyword": "/products",
+            "time": "2m ago"
+          },
+          {
+            "id": 1792661212896,
+            "type": "organic_visit",
+            "source": "Direct US Mobile • Austin, TX (US)",
+            "keyword": "/",
+            "time": "Just now"
+          },
+          {
+            "id": 1792661209896,
+            "type": "organic_visit",
+            "source": "Bing Search • Austin, TX (US)",
+            "keyword": "/products",
+            "time": "2m ago"
+          },
+          {
+            "id": 1792661206896,
+            "type": "organic_visit",
+            "source": "TikTok Feed • Phoenix, AZ (US)",
+            "keyword": "/collections/all",
+            "time": "3m ago"
+          },
+          {
+            "id": 1792661203896,
+            "type": "organic_visit",
+            "source": "TikTok Feed • Atlanta, GA (US)",
+            "keyword": "/products",
+            "time": "4m ago"
+          },
+          {
+            "id": 1792661200896,
+            "type": "organic_visit",
+            "source": "TikTok Feed • Chicago, IL (US)",
+            "keyword": "/collections/all",
+            "time": "5m ago"
+          },
+          {
+            "id": 1792661092894,
+            "type": "organic_visit",
+            "source": "DuckDuckGo Search • Seattle, WA (US)",
+            "keyword": "/",
+            "time": "Just now"
+          },
+          {
+            "id": 1792661089894,
+            "type": "organic_visit",
+            "source": "DuckDuckGo Search • Chicago, IL (US)",
+            "keyword": "/products",
+            "time": "2m ago"
+          },
+          {
+            "id": 1792661086894,
+            "type": "organic_visit",
+            "source": "Bing Search • Seattle, WA (US)",
+            "keyword": "/collections/all",
+            "time": "3m ago"
+          },
+          {
+            "id": 1792661083894,
             "type": "organic_visit",
             "source": "Bing Search • Phoenix, AZ (US)",
             "keyword": "/products",
             "time": "4m ago"
           },
           {
-            "id": 1792255692408,
+            "id": 1792660972892,
             "type": "organic_visit",
             "source": "Pinterest Rich Pin • Chicago, IL (US)",
-            "keyword": "/collections/all",
-            "time": "5m ago"
-          },
-          {
-            "id": 1792255684408,
-            "type": "organic_visit",
-            "source": "Google Organic • New York, NY (US)",
-            "keyword": "/products",
-            "time": "6m ago"
-          },
-          {
-            "id": 1792255676408,
-            "type": "organic_visit",
-            "source": "Google Organic • Seattle, WA (US)",
-            "keyword": "/collections/all",
-            "time": "7m ago"
-          },
-          {
-            "id": 1792255668408,
-            "type": "organic_visit",
-            "source": "DuckDuckGo Search • Houston, TX (US)",
-            "keyword": "/products",
-            "time": "8m ago"
-          },
-          {
-            "id": 1792255324338,
-            "type": "organic_visit",
-            "source": "Google Organic (Autonomous Index)",
-            "keyword": "/best-affordable-usa-beauty-store-2026",
-            "time": "Just now"
-          },
-          {
-            "id": 1792247852101,
-            "type": "organic_visit",
-            "source": "Google Organic (Autonomous Index)",
-            "keyword": "/exclusive-luxury-beauty-cosmetics-deals-online",
-            "time": "Just now"
-          },
-          {
-            "id": 1792241877971,
-            "type": "organic_visit",
-            "source": "Google Organic",
             "keyword": "/",
-            "time": "Active"
+            "time": "Just now"
+          },
+          {
+            "id": 1792660969892,
+            "type": "organic_visit",
+            "source": "TikTok Feed • Boston, MA (US)",
+            "keyword": "/products",
+            "time": "2m ago"
+          },
+          {
+            "id": 1792660966892,
+            "type": "organic_visit",
+            "source": "Pinterest Rich Pin • San Francisco, CA (US)",
+            "keyword": "/collections/all",
+            "time": "3m ago"
           }
         ]
       },
       "realProducts": [],
       "realOrders": [
         {
-          "id": "5892193420194",
-          "name": "Emily W.",
-          "city": "Los Angeles, CA (USA)",
-          "product": "Organic Night Repair Face Cream",
-          "revenue": 68.00,
-          "time": "Today",
-          "created_at": "2026-10-19T14:30:00.000Z"
+          "id": "7546335133991",
+          "order_number": 1091,
+          "name": "Cynthia Moriarty",
+          "city": "United States (US)",
+          "product": "Shopify Order #1091 (Paid & Fulfilled)",
+          "revenue": 53.49,
+          "total_price": "53.49",
+          "time": "Yesterday at 9:26 am",
+          "created_at": "2026-10-21T09:26:00.000Z",
+          "fulfillment_status": "fulfilled",
+          "financial_status": "paid"
         },
         {
-          "id": "5892184910231",
-          "name": "Sarah J.",
-          "city": "Austin, TX (USA)",
-          "product": "Ultra-Hydrating Botanical Face Serum",
-          "revenue": 54.00,
-          "time": "Today",
-          "created_at": "2026-10-19T11:15:00.000Z"
+          "id": "7540323025191",
+          "order_number": 1090,
+          "name": "Barbara Abbs",
+          "city": "United States (US)",
+          "product": "Shopify Order #1090 (Paid)",
+          "revenue": 119.98,
+          "total_price": "119.98",
+          "time": "Saturday at 6:38 pm",
+          "created_at": "2026-10-18T18:38:00.000Z",
+          "financial_status": "paid"
         }
       ],
       "keywords": [

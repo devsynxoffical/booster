@@ -14,7 +14,8 @@ import {
   Loader2
 } from 'lucide-react';
 
-export default function SeoEngineView({ isMerchantMode }) {
+export default function SeoEngineView({ isMerchantMode, activeStore }) {
+  const currentShop = activeStore?.shopDomain || (typeof window !== 'undefined' ? new URLSearchParams(window.location.search).get('shop') || '' : '');
   const [keywords, setKeywords] = useState([]);
   const [articles, setArticles] = useState([]);
   const [nicheInput, setNicheInput] = useState('minimalist lifestyle & ergonomics');
@@ -28,24 +29,26 @@ export default function SeoEngineView({ isMerchantMode }) {
   const [selectedArticleModal, setSelectedArticleModal] = useState(null);
 
   useEffect(() => {
-    fetch('/api/seo/keywords')
+    const qs = currentShop ? `?shop=${encodeURIComponent(currentShop)}` : '';
+    fetch(`/api/seo/keywords${qs}`)
       .then(r => r.json())
       .then(d => setKeywords(d))
       .catch(() => {});
 
-    fetch('/api/seo/articles')
+    fetch(`/api/seo/articles${qs}`)
       .then(r => r.json())
       .then(d => setArticles(d))
       .catch(() => {});
-  }, []);
+  }, [currentShop]);
 
   const handleFindKeywords = async () => {
     setIsFindingKeywords(true);
     try {
-      const res = await fetch('/api/seo/generate-keyword', {
+      const qs = currentShop ? `?shop=${encodeURIComponent(currentShop)}` : '';
+      const res = await fetch(`/api/seo/generate-keyword${qs}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ niche: nicheInput, productCategory: nicheInput })
+        body: JSON.stringify({ niche: nicheInput, productCategory: nicheInput, shop: currentShop })
       });
       const data = await res.json();
       if (data.keywords) setKeywords(data.keywords);
@@ -59,10 +62,11 @@ export default function SeoEngineView({ isMerchantMode }) {
   const handleGenerateArticle = async () => {
     setIsGeneratingArticle(true);
     try {
-      const res = await fetch('/api/seo/generate-article', {
+      const qs = currentShop ? `?shop=${encodeURIComponent(currentShop)}` : '';
+      const res = await fetch(`/api/seo/generate-article${qs}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ targetKeyword: selectedKeyword, productFocus })
+        body: JSON.stringify({ targetKeyword: selectedKeyword, productFocus, shop: currentShop })
       });
       const data = await res.json();
       if (data.article) {
@@ -76,6 +80,26 @@ export default function SeoEngineView({ isMerchantMode }) {
     }
   };
 
+  const handleRunAudit = async () => {
+    setIsAuditing(true);
+    try {
+      const qs = currentShop ? `?shop=${encodeURIComponent(currentShop)}` : '';
+      const res = await fetch(`/api/seo/audit${qs}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ shop: currentShop })
+      });
+      const data = await res.json();
+      if (data.audit) {
+        setAuditData(data.audit);
+      }
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setIsAuditing(false);
+    }
+  };
+
   const [isAutoPiloting, setIsAutoPiloting] = useState(false);
   const [autoPilotStatus, setAutoPilotStatus] = useState(null);
 
@@ -83,10 +107,11 @@ export default function SeoEngineView({ isMerchantMode }) {
     setIsAutoPiloting(true);
     setAutoPilotStatus('Scanning store catalog and niche search trends on Google...');
     try {
-      const kwRes = await fetch('/api/seo/generate-keyword', {
+      const qs = currentShop ? `?shop=${encodeURIComponent(currentShop)}` : '';
+      const kwRes = await fetch(`/api/seo/generate-keyword${qs}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ niche: nicheInput })
+        body: JSON.stringify({ niche: nicheInput, shop: currentShop })
       });
       const kwData = await kwRes.json();
       const discoveredKw = kwData.keywords || [];
@@ -95,10 +120,10 @@ export default function SeoEngineView({ isMerchantMode }) {
       setAutoPilotStatus('Auto-writing & publishing high-ranking buyer guide to Shopify Blog...');
       const targetKw = discoveredKw[0]?.keyword || selectedKeyword;
 
-      const artRes = await fetch('/api/seo/generate-article', {
+      const artRes = await fetch(`/api/seo/generate-article${qs}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ targetKeyword: targetKw, productFocus })
+        body: JSON.stringify({ targetKeyword: targetKw, productFocus, shop: currentShop })
       });
       const artData = await artRes.json();
       if (artData.article) {

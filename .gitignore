@@ -3,3 +3,5 @@ dist
 client/dist
 .DS_Store
 .env
+*.bak
+*.tmp

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   ShoppingBag, 
   Clock, 
@@ -15,6 +15,12 @@ import {
 export default function WidgetsConfigView({ config, onUpdateConfig }) {
   const [formData, setFormData] = useState({ ...config });
   const [isSaved, setIsSaved] = useState(false);
+
+  useEffect(() => {
+    if (config) {
+      setFormData(prev => ({ ...prev, ...config }));
+    }
+  }, [config]);
 
   const handleChange = (field, value) => {
     setFormData(prev => ({ ...prev, [field]: value }));

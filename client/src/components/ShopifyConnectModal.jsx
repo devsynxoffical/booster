@@ -42,7 +42,7 @@ export default function ShopifyConnectModal({ isOpen, onClose, onStoreChanged })
       const data = await res.json();
       setStoresData(data);
       if (data.appConfig) {
-        setClientIdInput(data.appConfig.clientId || 'bc4244d5d21d40ac26fb7e0154a47d35');
+        setClientIdInput(data.appConfig.clientId || '4d64bd85effdc3825141e559a7c7b890');
         setClientSecretInput(data.appConfig.clientSecret || '');
         setPublicUrlInput(data.appConfig.publicAppUrl || window.location.origin);
       }

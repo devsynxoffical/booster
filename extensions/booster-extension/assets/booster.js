@@ -64,6 +64,29 @@
           }
         })
         .catch(() => {});
+
+      // Fetch dynamic store configuration to support 1-line script embed
+      fetch(`${config.appUrl}/api/config?shop=${encodeURIComponent(detectedShop)}`)
+        .then(res => res.json())
+        .then(cfg => {
+          if (cfg && typeof cfg === 'object') {
+            if (cfg.enablePopups !== undefined) config.enablePopups = cfg.enablePopups;
+            if (cfg.popupPosition) config.popupPosition = cfg.popupPosition;
+            if (cfg.popupDelay) config.popupDelay = parseInt(cfg.popupDelay, 10) * 1000;
+            if (cfg.popupDuration) config.popupDuration = parseInt(cfg.popupDuration, 10) * 1000;
+            if (cfg.enableVisitorCounter !== undefined) config.enableVisitorCounter = cfg.enableVisitorCounter;
+            if (cfg.minVisitors) config.minVisitors = parseInt(cfg.minVisitors, 10);
+            if (cfg.maxVisitors) config.maxVisitors = parseInt(cfg.maxVisitors, 10);
+            if (cfg.enableFreeShipping !== undefined) config.enableFreeShipping = cfg.enableFreeShipping;
+            if (cfg.freeShippingThreshold) config.freeShippingThreshold = parseFloat(cfg.freeShippingThreshold);
+            if (cfg.shippingCurrency) config.currencySymbol = cfg.shippingCurrency;
+            if (cfg.enableCountdown !== undefined) config.enableCountdown = cfg.enableCountdown;
+            if (cfg.countdownMinutes) config.countdownMinutes = parseInt(cfg.countdownMinutes, 10);
+            if (cfg.accentColor) config.accentColor = cfg.accentColor;
+            if (cfg.themeMode) config.themeMode = cfg.themeMode;
+          }
+        })
+        .catch(() => {});
     } catch (e) {}
   }
 
@@ -166,7 +189,7 @@
         <div class="booster-popup-card" id="booster-active-card">
           <button class="booster-close-btn" aria-label="Close notification">&times;</button>
           <div class="booster-thumb-wrap">
-            <img src="${item.img}" alt="${item.product}" class="booster-thumb" loading="lazy" />
+            <img src="${item.img}" alt="${item.product}" class="booster-thumb" loading="lazy" onerror="this.src='https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?w=150&auto=format&fit=crop&q=80';this.onerror=null;" />
             <span class="booster-verified-dot" title="Verified Buyer">✓</span>
           </div>
           <div class="booster-content">
@@ -201,7 +224,15 @@
       } catch (e) {}
 
       card.addEventListener('mouseenter', () => { isHovered = true; });
-      card.addEventListener('mouseleave', () => { isHovered = false; });
+      card.addEventListener('mouseleave', () => { 
+        isHovered = false; 
+        setTimeout(() => {
+          if (!isHovered && card) {
+            card.classList.remove('booster-show');
+            card.classList.add('booster-hide');
+          }
+        }, 2000);
+      });
 
       card.addEventListener('click', () => {
         try {
@@ -281,8 +312,9 @@
       `;
     }
 
-    // Initial render with cart total
+    // Initial render with cart total & refresh immediately from Shopify Ajax API
     updateBar(config.cartTotal);
+    refreshCart();
 
     // Refresh cart dynamically on standard Shopify events
     function refreshCart() {
@@ -317,9 +349,14 @@
   function initVisitorCounter() {
     if (!config.enableVisitorCounter) return;
 
-    // Check if product form exists
-    const productForm = document.querySelector('form[action*="/cart/add"]') || document.querySelector('.product-form') || document.querySelector('[data-product-form]');
-    if (!productForm) return;
+    // Check if add-to-cart button or product form exists
+    const targetEl = document.querySelector('button[name="add"]')
+      || document.querySelector('.product-form__submit')
+      || document.querySelector('[data-add-to-cart]')
+      || document.querySelector('form[action*="/cart/add"]') 
+      || document.querySelector('.product-form') 
+      || document.querySelector('[data-product-form]');
+    if (!targetEl) return;
 
     // Generate stable pseudo-random viewer count
     const min = config.minVisitors;
@@ -336,8 +373,12 @@
       <span class="booster-scarcity-tag">High Demand</span>
     `;
 
-    // Insert above or below product add to cart button
-    productForm.parentNode.insertBefore(counterEl, productForm);
+    // Insert adjacent to add to cart button
+    if (targetEl.tagName === 'BUTTON' || targetEl.classList.contains('product-form__submit')) {
+      targetEl.parentNode.insertBefore(counterEl, targetEl);
+    } else {
+      targetEl.parentNode.insertBefore(counterEl, targetEl);
+    }
 
     // Subtly fluctuate viewers every 12-18 seconds to look natural
     setInterval(() => {
@@ -431,7 +472,7 @@
             "offers": {
               "@type": "Offer",
               "url": window.location.href,
-              "priceCurrency": config.currencySymbol === '$' ? 'USD' : (config.currencySymbol || 'USD'),
+              "priceCurrency": window.Shopify?.currency?.active || (config.currencySymbol === '€' ? 'EUR' : (config.currencySymbol === '£' ? 'GBP' : (config.currencySymbol === 'CAD' ? 'CAD' : 'USD'))),
               "price": (product.price / 100.0).toFixed(2),
               "priceValidUntil": new Date(Date.now() + 30 * 24 * 3600 * 1000).toISOString().split('T')[0],
               "itemCondition": "https://schema.org/NewCondition",
@@ -469,25 +510,100 @@
       const checkoutObj = (window.Shopify && window.Shopify.checkout) ? window.Shopify.checkout : null;
 
       if (isThankYou || checkoutObj) {
-        const urlOrderId = (window.location.search.match(/order_id=([^&]+)/)?.[1]) || (path.split('/').pop());
-        const orderId = checkoutObj?.order_id || checkoutObj?.id || urlOrderId;
-        if (!orderId || orderId === 'thank_you') return;
+        // Extract order ID or checkout token across all Shopify checkout versions
+        let extractedOrderId = null;
 
-        const dedupeKey = `__booster_captured_order_${orderId}`;
+        // 1. Check window.Shopify.checkout
+        if (checkoutObj?.order_id || checkoutObj?.id) {
+          extractedOrderId = String(checkoutObj.order_id || checkoutObj.id);
+        }
+
+        // 2. Check window.ShopifyAnalytics page meta
+        if (!extractedOrderId && window.ShopifyAnalytics?.meta?.page?.orderId) {
+          extractedOrderId = String(window.ShopifyAnalytics.meta.page.orderId);
+        }
+
+        // 3. Check DOM confirmation elements (Shopify order status page)
+        if (!extractedOrderId) {
+          const domOrderElem = document.querySelector('.os-order-number') || 
+                               document.querySelector('.order-number') || 
+                               document.querySelector('[data-order-id]');
+          if (domOrderElem) {
+            extractedOrderId = domOrderElem.textContent.trim().replace(/^#/, '');
+          }
+        }
+
+        // 4. Check URL query params
+        if (!extractedOrderId) {
+          const queryId = window.location.search.match(/[?&](order_id|order|id)=([^&]+)/i)?.[2];
+          if (queryId) extractedOrderId = decodeURIComponent(queryId);
+        }
+
+        // 5. Extract token from URL path (e.g. /checkouts/c/abcdef12345/thank_you or /orders/987654321)
+        if (!extractedOrderId && isThankYou) {
+          const cleanPath = path.replace(/\/thank_you\/?$/, '');
+          const parts = cleanPath.split('/').filter(Boolean);
+          const lastPart = parts[parts.length - 1];
+          if (lastPart && lastPart !== 'checkouts' && lastPart !== 'orders') {
+            extractedOrderId = lastPart;
+          }
+        }
+
+        if (!extractedOrderId || extractedOrderId === 'thank_you') {
+          if (isThankYou) {
+            let sessionOrderId = sessionStorage.getItem('__booster_current_checkout_id');
+            if (!sessionOrderId) {
+              sessionOrderId = 'order_' + Date.now();
+              sessionStorage.setItem('__booster_current_checkout_id', sessionOrderId);
+            }
+            extractedOrderId = sessionOrderId;
+          } else {
+            return;
+          }
+        }
+
+        const dedupeKey = `__booster_captured_order_${extractedOrderId}`;
         if (sessionStorage.getItem(dedupeKey)) return;
         sessionStorage.setItem(dedupeKey, '1');
 
-        const firstItem = (checkoutObj?.line_items && checkoutObj.line_items[0]) ? checkoutObj.line_items[0].title : (document.querySelector('.product__description__name')?.textContent?.trim() || 'Store Product');
-        const price = checkoutObj?.total_price || checkoutObj?.payment_due || (parseFloat(document.querySelector('.payment-due__price')?.textContent?.replace(/[^0-9.]/g, '') || '0'));
+        // Extract product name
+        const firstItem = (checkoutObj?.line_items && checkoutObj.line_items[0]) 
+          ? checkoutObj.line_items[0].title 
+          : (document.querySelector('.product__description__name')?.textContent?.trim() || 
+             document.querySelector('.os-line-item__title')?.textContent?.trim() || 
+             'Store Product');
+
+        // Extract total price
+        let price = checkoutObj?.total_price || checkoutObj?.payment_due;
+        if (!price) {
+          const priceElem = document.querySelector('[data-checkout-payment-due-target]') || 
+                            document.querySelector('.payment-due__price') || 
+                            document.querySelector('.total-line__price span') ||
+                            document.querySelector('.order-summary__emphasis');
+          if (priceElem) {
+            price = parseFloat(priceElem.textContent.replace(/[^0-9.]/g, '')) || 0;
+          }
+        }
+
+        // Extract customer name & location
+        const nameElem = document.querySelector('.os-step__description address') || 
+                         document.querySelector('.address--tight');
+        const domName = nameElem ? nameElem.textContent.split('\n')[0].trim() : null;
+        const customerName = checkoutObj?.shipping_address?.first_name 
+          ? `${checkoutObj.shipping_address.first_name} ${checkoutObj.shipping_address.last_name || ''}`.trim()
+          : (domName || 'Verified Customer');
+
+        const city = checkoutObj?.shipping_address?.city || 'United States';
+        const country = checkoutObj?.shipping_address?.country || 'USA';
 
         const payload = JSON.stringify({
           shop: detectedShop,
-          orderId: String(orderId),
+          orderId: String(extractedOrderId),
           totalPrice: parseFloat(price) || 0,
           currency: checkoutObj?.currency || '$',
-          customerName: checkoutObj?.shipping_address?.first_name || 'Verified Customer',
-          city: checkoutObj?.shipping_address?.city || 'United States',
-          country: checkoutObj?.shipping_address?.country || 'USA',
+          customerName: customerName,
+          city: city,
+          country: country,
           items: [firstItem]
         });
 
