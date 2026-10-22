@@ -1318,13 +1318,21 @@ Available at ${store.storeName}. Handcrafted with premium ingredients and 5-star
     const cfg = store.settings.autoTraffic;
     const intervalMs = (cfg.intervalMinutes || 5) * 60 * 1000;
     const timeSinceLast = Date.now() - (cfg.lastRunTimestamp || 0);
-    const msUntilNext = Math.max(0, intervalMs - timeSinceLast);
+
+    // If interval has elapsed (e.g. after container wake-up or inactivity), execute catch-up cycle immediately!
+    if (cfg.enabled && timeSinceLast >= intervalMs) {
+      executeAutoPilotTrafficCycle(store, data);
+      saveData(data);
+    }
+
+    const updatedTimeSinceLast = Date.now() - (cfg.lastRunTimestamp || 0);
+    const msUntilNext = Math.max(0, intervalMs - updatedTimeSinceLast);
 
     res.json({
       success: true,
       autoTraffic: {
         ...cfg,
-        secondsUntilNextRun: Math.round(msUntilNext / 1000)
+        secondsUntilNextRun: Math.max(1, Math.round(msUntilNext / 1000))
       },
       stats: store.stats
     });
@@ -1410,6 +1418,24 @@ Available at ${store.storeName}. Handcrafted with premium ingredients and 5-star
       console.warn('[Auto-Pilot Traffic] Scheduler notice:', e.message || e);
     }
   }, 60 * 1000);
+
+  // 24/7 Health Check & Keep-Alive to prevent Render free-tier from sleeping
+  app.get('/api/health', (req, res) => {
+    res.json({
+      status: 'ok',
+      uptime: process.uptime(),
+      timestamp: Date.now()
+    });
+  });
+
+  const appPublicHost = process.env.PUBLIC_APP_URL || process.env.RENDER_EXTERNAL_URL || 'https://booster-5imz.onrender.com';
+  if (appPublicHost && appPublicHost.startsWith('http')) {
+    setInterval(() => {
+      try {
+        fetch(`${appPublicHost}/api/health`).catch(() => {});
+      } catch {}
+    }, 8 * 60 * 1000); // Ping every 8 minutes (Render sleeps at 15 minutes)
+  }
 
   /* -------------------------------------------------------------
    * 4. Multi-Tenant Public Storefront APIs (for booster.js)

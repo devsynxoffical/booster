@@ -154,11 +154,11 @@ export default function DashboardView({ stats, config, connection, isMerchantMod
     const timer = setInterval(() => {
       setAutoTrafficCfg(prev => {
         if (!prev.enabled) return prev;
-        if (prev.secondsUntilNextRun <= 1) {
+        if (!prev.secondsUntilNextRun || prev.secondsUntilNextRun <= 1) {
           fetchAutoTrafficStatus();
           return { ...prev, secondsUntilNextRun: (prev.intervalMinutes || 5) * 60 };
         }
-        return { ...prev, secondsUntilNextRun: prev.secondsUntilNextRun - 1 };
+        return { ...prev, secondsUntilNextRun: Math.max(1, prev.secondsUntilNextRun - 1) };
       });
     }, 1000);
     return () => clearInterval(timer);
@@ -399,9 +399,8 @@ export default function DashboardView({ stats, config, connection, isMerchantMod
         </div>
       </div>
 
-      {/* 24/7 Automated Daily Traffic Engine Card (Super Admin Exclusive - Hidden From Merchants) */}
-      {!isMerchantMode && (
-        <div style={{
+      {/* 24/7 Automated Daily Traffic Engine Card (Store Admin Panel - Never Visible to Storefront Shoppers) */}
+      <div style={{
         background: 'linear-gradient(135deg, #ffffff 0%, #f8faff 100%)',
         border: '1px solid #bfdbfe',
         borderRadius: '16px',
@@ -433,11 +432,11 @@ export default function DashboardView({ stats, config, connection, isMerchantMod
               </span>
 
               <span className="badge badge-blue" style={{ fontSize: '11px', display: 'flex', alignItems: 'center', gap: '5px' }}>
-                <MapPin size={12} /> Target: United States (US Metros)
+                <ShieldCheck size={12} /> Store Admin Only • 100% Hidden From Storefront Shoppers
               </span>
 
               <span className="badge badge-purple" style={{ fontSize: '11px', display: 'flex', alignItems: 'center', gap: '5px' }}>
-                <Search size={12} /> Google Organic (88%) + Bing & Social
+                <MapPin size={12} /> Target: United States (US Metros)
               </span>
             </div>
 
@@ -831,7 +830,6 @@ export default function DashboardView({ stats, config, connection, isMerchantMod
           </div>
         )}
       </div>
-      )}
 
       {/* 2x2 Metric Cards Grid (Real Store Telemetry) */}
       <div className="metrics-grid-2x2">
