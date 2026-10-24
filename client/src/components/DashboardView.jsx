@@ -23,7 +23,14 @@ import {
   Play,
   Pause,
   Activity,
-  Sliders
+  Sliders,
+  CheckCircle2,
+  AlertCircle,
+  X,
+  Copy,
+  Check,
+  ExternalLink,
+  Key
 } from 'lucide-react';
 
 export default function DashboardView({ stats, config, connection, isMerchantMode, onOpenConnect, onNavigate, onRefreshData }) {
@@ -111,6 +118,35 @@ export default function DashboardView({ stats, config, connection, isMerchantMod
 
   const [isSyncingOrders, setIsSyncingOrders] = useState(false);
   const [syncOrderMsg, setSyncOrderMsg] = useState(null);
+
+  // Orders & Auto-Sync Management Modal State
+  const [showOrdersModal, setShowOrdersModal] = useState(false);
+  const [ordersList, setOrdersList] = useState([]);
+  const [ordersModalTab, setOrdersModalTab] = useState('list'); // 'list' | 'import' | 'setup'
+  const [orderImportText, setOrderImportText] = useState('');
+  const [isImportingOrders, setIsImportingOrders] = useState(false);
+  const [importResult, setImportResult] = useState(null);
+  const [tokenInput, setTokenInput] = useState('');
+  const [isSavingToken, setIsSavingToken] = useState(false);
+  const [tokenSaveResult, setTokenSaveResult] = useState(null);
+  const [hasShopifyToken, setHasShopifyToken] = useState(false);
+  const [webhookUrl, setWebhookUrl] = useState('https://booster-5imz.onrender.com/api/webhooks/orders/create');
+  const [webhookCopied, setWebhookCopied] = useState(false);
+
+  const fetchOrdersList = async () => {
+    try {
+      const qs = connection?.shopDomain ? `?shop=${encodeURIComponent(connection.shopDomain)}` : '';
+      const res = await fetch(`/api/stores/orders${qs}`);
+      const data = await res.json();
+      if (data.success) {
+        setOrdersList(data.orders || []);
+        setHasShopifyToken(Boolean(data.hasToken));
+        if (data.webhookUrl) setWebhookUrl(data.webhookUrl);
+      }
+    } catch (e) {
+      console.warn('Failed to fetch orders:', e);
+    }
+  };
 
   // Auto-Pilot Continuous Traffic Engine State
   const [autoTrafficCfg, setAutoTrafficCfg] = useState({
@@ -230,12 +266,19 @@ export default function DashboardView({ stats, config, connection, isMerchantMod
         headers: { 'Content-Type': 'application/json' }
       });
       const data = await res.json();
+      if (data.orders) setOrdersList(data.orders);
+      if (data.webhookUrl) setWebhookUrl(data.webhookUrl);
       if (data.success) {
         setSyncOrderMsg(data.message || 'Orders synced!');
         if (onRefreshData) onRefreshData();
         setTimeout(() => setSyncOrderMsg(null), 5000);
       } else {
-        setSyncOrderMsg(data.error || 'Sync notice: connecting...');
+        setSyncOrderMsg(data.message || data.error || 'Sync notice: token required');
+        if (data.requiresToken) {
+          setShowOrdersModal(true);
+          setOrdersModalTab('setup');
+          fetchOrdersList();
+        }
         setTimeout(() => setSyncOrderMsg(null), 5000);
       }
     } catch (e) {
@@ -243,6 +286,70 @@ export default function DashboardView({ stats, config, connection, isMerchantMod
     } finally {
       setIsSyncingOrders(false);
     }
+  };
+
+  const handleImportOrders = async (e) => {
+    e.preventDefault();
+    if (!orderImportText.trim()) return;
+    setIsImportingOrders(true);
+    setImportResult(null);
+    try {
+      const qs = connection?.shopDomain ? `?shop=${encodeURIComponent(connection.shopDomain)}` : '';
+      const res = await fetch(`/api/stores/import-orders${qs}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ rawText: orderImportText })
+      });
+      const data = await res.json();
+      if (data.success) {
+        setImportResult({ type: 'success', text: data.message });
+        setOrdersList(data.orders || []);
+        setOrderImportText('');
+        if (onRefreshData) onRefreshData();
+        setTimeout(() => setOrdersModalTab('list'), 1500);
+      } else {
+        setImportResult({ type: 'error', text: data.error || 'Failed to parse orders' });
+      }
+    } catch (err) {
+      setImportResult({ type: 'error', text: 'Network error importing orders' });
+    } finally {
+      setIsImportingOrders(false);
+    }
+  };
+
+  const handleSaveToken = async (e) => {
+    e.preventDefault();
+    if (!tokenInput.trim()) return;
+    setIsSavingToken(true);
+    setTokenSaveResult(null);
+    try {
+      const qs = connection?.shopDomain ? `?shop=${encodeURIComponent(connection.shopDomain)}` : '';
+      const res = await fetch(`/api/stores/save-token${qs}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ accessToken: tokenInput.trim() })
+      });
+      const data = await res.json();
+      if (data.success) {
+        setTokenSaveResult({ type: 'success', text: data.message });
+        setHasShopifyToken(true);
+        setOrdersList(data.orders || []);
+        setTokenInput('');
+        if (onRefreshData) onRefreshData();
+      } else {
+        setTokenSaveResult({ type: 'error', text: data.error || 'Failed to save token' });
+      }
+    } catch (err) {
+      setTokenSaveResult({ type: 'error', text: 'Network connection error' });
+    } finally {
+      setIsSavingToken(false);
+    }
+  };
+
+  const handleCopyWebhookUrl = () => {
+    navigator.clipboard.writeText(webhookUrl);
+    setWebhookCopied(true);
+    setTimeout(() => setWebhookCopied(false), 2500);
   };
 
   return (
@@ -906,9 +1013,34 @@ export default function DashboardView({ stats, config, connection, isMerchantMod
               <span className="metric-label">Store Orders & Revenue</span>
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <div className="trend-badge badge-trend-green">
+              <div 
+                className="trend-badge badge-trend-green"
+                onClick={() => { setShowOrdersModal(true); fetchOrdersList(); }}
+                style={{ cursor: 'pointer' }}
+                title="Click to view all real orders"
+              >
                 {stats.totalOrdersBoosted || 0} Orders
               </div>
+              <button
+                type="button"
+                onClick={() => { setShowOrdersModal(true); fetchOrdersList(); }}
+                title="Manage Orders & Auto-Sync"
+                style={{
+                  background: '#eff6ff',
+                  border: '1px solid #bfdbfe',
+                  cursor: 'pointer',
+                  padding: '3px 8px',
+                  borderRadius: '6px',
+                  fontSize: '11px',
+                  fontWeight: '600',
+                  color: '#2563eb',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '4px'
+                }}
+              >
+                <span>Orders</span>
+              </button>
               <button
                 type="button"
                 onClick={handleSyncOrders}
@@ -930,14 +1062,28 @@ export default function DashboardView({ stats, config, connection, isMerchantMod
               </button>
             </div>
           </div>
-          <div className="metric-large-number">
+          <div 
+            className="metric-large-number"
+            onClick={() => { setShowOrdersModal(true); fetchOrdersList(); }}
+            style={{ cursor: 'pointer' }}
+            title="Click to view order breakdown"
+          >
             ${stats.revenueGenerated ? stats.revenueGenerated.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '0.00'}
           </div>
           <div className="metric-comparison" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            <span style={{ color: syncOrderMsg ? '#2563eb' : '#94a3b8', fontWeight: syncOrderMsg ? 600 : 400 }}>
+            <span 
+              onClick={() => { setShowOrdersModal(true); fetchOrdersList(); }}
+              style={{ color: syncOrderMsg ? '#2563eb' : '#94a3b8', fontWeight: syncOrderMsg ? 600 : 400, cursor: 'pointer' }}
+            >
               {syncOrderMsg ? syncOrderMsg : 'Directly synced from real Shopify orders'}
             </span>
-            <span style={{ fontSize: '11px', color: '#10b981', fontWeight: 600 }}>• Auto-syncing</span>
+            <span 
+              onClick={() => { setShowOrdersModal(true); setOrdersModalTab('setup'); fetchOrdersList(); }}
+              style={{ fontSize: '11px', color: '#10b981', fontWeight: 600, cursor: 'pointer' }}
+              title="Click to configure live auto-sync"
+            >
+              • Auto-syncing
+            </span>
           </div>
         </div>
       </div>
@@ -1033,15 +1179,15 @@ export default function DashboardView({ stats, config, connection, isMerchantMod
                   justifyContent: 'center',
                   flexShrink: 0
                 }}>
-                  {item.type === 'popup_conversion' ? <ShoppingBag size={16} /> : <Search size={16} />}
+                  {(item.type === 'popup_conversion' || item.type === 'order_boosted') ? <ShoppingBag size={16} /> : <Search size={16} />}
                 </div>
 
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div style={{ fontSize: '13px', fontWeight: '700', color: '#0f172a' }}>
-                    {item.type === 'popup_conversion' ? `Real Store Order: $${item.revenue.toFixed(2)}` : item.source}
+                    {(item.type === 'popup_conversion' || item.type === 'order_boosted') ? `Real Store Order: $${(Number(item.revenue) || 0).toFixed(2)}` : item.source}
                   </div>
                   <div style={{ fontSize: '11.5px', color: '#64748b' }}>
-                    {item.type === 'popup_conversion' ? `${item.product} • ${item.buyer}` : `Target: ${item.keyword}`}
+                    {(item.type === 'popup_conversion' || item.type === 'order_boosted') ? `${item.product} • ${item.buyer || 'Verified Buyer'}` : `Target: ${item.keyword}`}
                   </div>
                 </div>
 
@@ -1057,6 +1203,460 @@ export default function DashboardView({ stats, config, connection, isMerchantMod
           </div>
         )}
       </div>
+
+      {/* Real Orders & Auto-Sync Control Modal */}
+      {showOrdersModal && (
+        <div style={{
+          position: 'fixed',
+          inset: 0,
+          background: 'rgba(15, 23, 42, 0.65)',
+          backdropFilter: 'blur(4px)',
+          zIndex: 9999,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          padding: '20px'
+        }}>
+          <div style={{
+            background: '#ffffff',
+            borderRadius: '20px',
+            width: '100%',
+            maxWidth: '680px',
+            maxHeight: '90vh',
+            display: 'flex',
+            flexDirection: 'column',
+            boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
+            border: '1px solid #e2e8f0',
+            overflow: 'hidden'
+          }}>
+            {/* Modal Header */}
+            <div style={{
+              padding: '20px 24px',
+              borderBottom: '1px solid #e2e8f0',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              background: '#f8fafc'
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <div style={{
+                  width: '40px',
+                  height: '40px',
+                  borderRadius: '10px',
+                  background: '#eff6ff',
+                  color: '#2563eb',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center'
+                }}>
+                  <ShoppingBag size={20} />
+                </div>
+                <div>
+                  <h3 style={{ margin: 0, fontSize: '17px', fontWeight: '700', color: '#0f172a' }}>
+                    Shopify Real Orders & Auto-Pilot
+                  </h3>
+                  <div style={{ fontSize: '12px', color: '#64748b', marginTop: '2px' }}>
+                    Verified Purchase Social Proof & Order Telemetry
+                  </div>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowOrdersModal(false)}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  cursor: 'pointer',
+                  color: '#64748b',
+                  padding: '6px',
+                  borderRadius: '8px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center'
+                }}
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            {/* Modal Tabs */}
+            <div style={{
+              display: 'flex',
+              borderBottom: '1px solid #e2e8f0',
+              background: '#f8fafc',
+              padding: '0 24px'
+            }}>
+              <button
+                type="button"
+                onClick={() => setOrdersModalTab('list')}
+                style={{
+                  padding: '12px 16px',
+                  border: 'none',
+                  background: 'none',
+                  cursor: 'pointer',
+                  fontSize: '13px',
+                  fontWeight: '600',
+                  color: ordersModalTab === 'list' ? '#2563eb' : '#64748b',
+                  borderBottom: ordersModalTab === 'list' ? '2px solid #2563eb' : '2px solid transparent',
+                  marginBottom: '-1px'
+                }}
+              >
+                Recorded Orders ({ordersList.length || stats.totalOrdersBoosted || 0})
+              </button>
+              <button
+                type="button"
+                onClick={() => setOrdersModalTab('import')}
+                style={{
+                  padding: '12px 16px',
+                  border: 'none',
+                  background: 'none',
+                  cursor: 'pointer',
+                  fontSize: '13px',
+                  fontWeight: '600',
+                  color: ordersModalTab === 'import' ? '#2563eb' : '#64748b',
+                  borderBottom: ordersModalTab === 'import' ? '2px solid #2563eb' : '2px solid transparent',
+                  marginBottom: '-1px'
+                }}
+              >
+                Quick Import / Paste
+              </button>
+              <button
+                type="button"
+                onClick={() => setOrdersModalTab('setup')}
+                style={{
+                  padding: '12px 16px',
+                  border: 'none',
+                  background: 'none',
+                  cursor: 'pointer',
+                  fontSize: '13px',
+                  fontWeight: '600',
+                  color: ordersModalTab === 'setup' ? '#2563eb' : '#64748b',
+                  borderBottom: ordersModalTab === 'setup' ? '2px solid #2563eb' : '2px solid transparent',
+                  marginBottom: '-1px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px'
+                }}
+              >
+                <span>Live Auto-Sync Setup</span>
+                {hasShopifyToken ? (
+                  <span style={{ fontSize: '10px', background: '#dcfce7', color: '#166534', padding: '2px 6px', borderRadius: '4px' }}>Active</span>
+                ) : (
+                  <span style={{ fontSize: '10px', background: '#fef3c7', color: '#92400e', padding: '2px 6px', borderRadius: '4px' }}>Setup Required</span>
+                )}
+              </button>
+            </div>
+
+            {/* Modal Body */}
+            <div style={{ padding: '24px', overflowY: 'auto', flex: 1 }}>
+              {/* Tab 1: Orders List */}
+              {ordersModalTab === 'list' && (
+                <div>
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    marginBottom: '16px',
+                    padding: '12px 16px',
+                    background: '#f0fdf4',
+                    border: '1px solid #bbf7d0',
+                    borderRadius: '12px'
+                  }}>
+                    <div>
+                      <div style={{ fontSize: '14px', fontWeight: '700', color: '#15803d' }}>
+                        Verified Revenue: ${stats.revenueGenerated ? stats.revenueGenerated.toFixed(2) : '0.00'} USD
+                      </div>
+                      <div style={{ fontSize: '12px', color: '#166534' }}>
+                        {ordersList.length || stats.totalOrdersBoosted || 0} real Shopify store orders active in Booster social proof
+                      </div>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={handleSyncOrders}
+                      disabled={isSyncingOrders}
+                      style={{
+                        padding: '8px 14px',
+                        background: '#16a34a',
+                        color: '#ffffff',
+                        border: 'none',
+                        borderRadius: '8px',
+                        fontSize: '12px',
+                        fontWeight: '600',
+                        cursor: isSyncingOrders ? 'not-allowed' : 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '6px'
+                      }}
+                    >
+                      <RefreshCw size={13} style={{ animation: isSyncingOrders ? 'spin 0.8s linear infinite' : 'none' }} />
+                      <span>{isSyncingOrders ? 'Syncing...' : 'Sync Shopify'}</span>
+                    </button>
+                  </div>
+
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                    {(ordersList.length > 0 ? ordersList : []).map(order => (
+                      <div key={order.id} style={{
+                        padding: '12px 16px',
+                        border: '1px solid #e2e8f0',
+                        borderRadius: '10px',
+                        background: '#ffffff',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        gap: '12px'
+                      }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                          <div style={{
+                            width: '36px',
+                            height: '36px',
+                            borderRadius: '8px',
+                            background: '#eff6ff',
+                            color: '#2563eb',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            fontWeight: '700',
+                            fontSize: '12px'
+                          }}>
+                            #{order.order_number || order.id?.slice(-4)}
+                          </div>
+                          <div>
+                            <div style={{ fontSize: '13px', fontWeight: '700', color: '#0f172a' }}>
+                              {order.name} <span style={{ color: '#64748b', fontWeight: '400', fontSize: '12px' }}>• {order.city}</span>
+                            </div>
+                            <div style={{ fontSize: '11.5px', color: '#64748b', marginTop: '2px' }}>
+                              {order.product} • {order.time}
+                            </div>
+                          </div>
+                        </div>
+
+                        <div style={{ textAlign: 'right' }}>
+                          <div style={{ fontSize: '14px', fontWeight: '700', color: '#0f172a' }}>
+                            ${Number(order.revenue || order.total_price || 0).toFixed(2)}
+                          </div>
+                          <div style={{ display: 'flex', gap: '4px', justifyContent: 'flex-end', marginTop: '3px' }}>
+                            <span style={{
+                              fontSize: '10px',
+                              padding: '1px 6px',
+                              borderRadius: '4px',
+                              background: '#dcfce7',
+                              color: '#166534',
+                              fontWeight: '600'
+                            }}>
+                              {order.financial_status || 'Paid'}
+                            </span>
+                            {order.fulfillment_status && (
+                              <span style={{
+                                fontSize: '10px',
+                                padding: '1px 6px',
+                                borderRadius: '4px',
+                                background: order.fulfillment_status === 'fulfilled' ? '#e0f2fe' : '#fef3c7',
+                                color: order.fulfillment_status === 'fulfilled' ? '#0369a1' : '#92400e',
+                                fontWeight: '600'
+                              }}>
+                                {order.fulfillment_status}
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Tab 2: Quick Import / Paste */}
+              {ordersModalTab === 'import' && (
+                <div>
+                  <p style={{ margin: '0 0 12px 0', fontSize: '13px', color: '#475569', lineHeight: 1.5 }}>
+                    Copy order text straight from your <strong>Shopify Admin ➔ Orders</strong> page and paste it below. The system automatically extracts order IDs, customer names, products, dates, and amounts.
+                  </p>
+
+                  <form onSubmit={handleImportOrders}>
+                    <textarea
+                      rows={8}
+                      value={orderImportText}
+                      onChange={(e) => setOrderImportText(e.target.value)}
+                      placeholder="Paste Shopify order summary, e.g.:&#10;Select gid://shopify/Order/7551651709223&#10;[#1094](...)&#10;Today at 3:13 am&#10;Jerry Brack&#10;$65.84&#10;Paid"
+                      style={{
+                        width: '100%',
+                        padding: '12px',
+                        border: '1px solid #cbd5e1',
+                        borderRadius: '10px',
+                        fontSize: '12.5px',
+                        fontFamily: 'monospace',
+                        outline: 'none',
+                        resize: 'vertical',
+                        boxSizing: 'border-box'
+                      }}
+                    />
+
+                    {importResult && (
+                      <div style={{
+                        marginTop: '12px',
+                        padding: '10px 14px',
+                        borderRadius: '8px',
+                        fontSize: '12.5px',
+                        background: importResult.type === 'success' ? '#f0fdf4' : '#fef2f2',
+                        color: importResult.type === 'success' ? '#15803d' : '#b91c1c',
+                        border: `1px solid ${importResult.type === 'success' ? '#bbf7d0' : '#fecaca'}`
+                      }}>
+                        {importResult.text}
+                      </div>
+                    )}
+
+                    <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '16px' }}>
+                      <button
+                        type="submit"
+                        disabled={isImportingOrders || !orderImportText.trim()}
+                        style={{
+                          padding: '10px 20px',
+                          background: '#2563eb',
+                          color: '#ffffff',
+                          border: 'none',
+                          borderRadius: '8px',
+                          fontSize: '13px',
+                          fontWeight: '600',
+                          cursor: (isImportingOrders || !orderImportText.trim()) ? 'not-allowed' : 'pointer'
+                        }}
+                      >
+                        {isImportingOrders ? 'Parsing & Saving...' : 'Parse & Save Orders'}
+                      </button>
+                    </div>
+                  </form>
+                </div>
+              )}
+
+              {/* Tab 3: Auto-Sync Setup */}
+              {ordersModalTab === 'setup' && (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                  {/* Webhook Section */}
+                  <div style={{
+                    padding: '16px',
+                    border: '1px solid #e2e8f0',
+                    borderRadius: '12px',
+                    background: '#f8fafc'
+                  }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+                      <Zap size={16} color="#2563eb" />
+                      <strong style={{ fontSize: '14px', color: '#0f172a' }}>Method 1: Shopify Instant Webhook (Zero Delay)</strong>
+                    </div>
+                    <p style={{ margin: '0 0 12px 0', fontSize: '12.5px', color: '#475569', lineHeight: 1.5 }}>
+                      Shopify automatically pushes new orders directly into your Booster database the moment a customer pays:
+                    </p>
+                    <ol style={{ margin: '0 0 12px 0', paddingLeft: '20px', fontSize: '12.5px', color: '#475569', lineHeight: 1.6 }}>
+                      <li>In your Shopify Admin, click <strong>Settings</strong> ➔ <strong>Notifications</strong>.</li>
+                      <li>Scroll to the bottom to <strong>Webhooks</strong> and click <strong>Create webhook</strong>.</li>
+                      <li>Event: select <strong>Order creation</strong> (and create a second one for <strong>Order payment</strong>). Format: <strong>JSON</strong>.</li>
+                      <li>Paste this exact Webhook URL:</li>
+                    </ol>
+
+                    <div style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '8px',
+                      background: '#ffffff',
+                      border: '1px solid #cbd5e1',
+                      borderRadius: '8px',
+                      padding: '8px 12px'
+                    }}>
+                      <code style={{ flex: 1, fontSize: '12px', color: '#0f172a', wordBreak: 'break-all' }}>
+                        {webhookUrl}
+                      </code>
+                      <button
+                        type="button"
+                        onClick={handleCopyWebhookUrl}
+                        style={{
+                          padding: '6px 12px',
+                          background: webhookCopied ? '#16a34a' : '#2563eb',
+                          color: '#ffffff',
+                          border: 'none',
+                          borderRadius: '6px',
+                          fontSize: '11px',
+                          fontWeight: '600',
+                          cursor: 'pointer',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '4px',
+                          flexShrink: 0
+                        }}
+                      >
+                        {webhookCopied ? <Check size={12} /> : <Copy size={12} />}
+                        <span>{webhookCopied ? 'Copied!' : 'Copy URL'}</span>
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Token Section */}
+                  <div style={{
+                    padding: '16px',
+                    border: '1px solid #e2e8f0',
+                    borderRadius: '12px',
+                    background: '#f8fafc'
+                  }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+                      <Key size={16} color="#2563eb" />
+                      <strong style={{ fontSize: '14px', color: '#0f172a' }}>Method 2: Shopify Admin API Token (Automatic 60s Polling)</strong>
+                    </div>
+                    <p style={{ margin: '0 0 12px 0', fontSize: '12.5px', color: '#475569', lineHeight: 1.5 }}>
+                      Allows Booster to automatically query Shopify Admin API every 60 seconds and sync all paid/fulfilled orders:
+                    </p>
+
+                    <form onSubmit={handleSaveToken} style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                      <div style={{ display: 'flex', gap: '8px' }}>
+                        <input
+                          type="password"
+                          value={tokenInput}
+                          onChange={(e) => setTokenInput(e.target.value)}
+                          placeholder="shpat_xxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+                          style={{
+                            flex: 1,
+                            padding: '10px 12px',
+                            border: '1px solid #cbd5e1',
+                            borderRadius: '8px',
+                            fontSize: '13px',
+                            outline: 'none'
+                          }}
+                        />
+                        <button
+                          type="submit"
+                          disabled={isSavingToken || !tokenInput.trim()}
+                          style={{
+                            padding: '10px 16px',
+                            background: '#0f172a',
+                            color: '#ffffff',
+                            border: 'none',
+                            borderRadius: '8px',
+                            fontSize: '12.5px',
+                            fontWeight: '600',
+                            cursor: (isSavingToken || !tokenInput.trim()) ? 'not-allowed' : 'pointer',
+                            flexShrink: 0
+                          }}
+                        >
+                          {isSavingToken ? 'Saving...' : 'Save & Activate'}
+                        </button>
+                      </div>
+
+                      {tokenSaveResult && (
+                        <div style={{
+                          padding: '8px 12px',
+                          borderRadius: '6px',
+                          fontSize: '12px',
+                          background: tokenSaveResult.type === 'success' ? '#f0fdf4' : '#fef2f2',
+                          color: tokenSaveResult.type === 'success' ? '#15803d' : '#b91c1c',
+                          border: `1px solid ${tokenSaveResult.type === 'success' ? '#bbf7d0' : '#fecaca'}`
+                        }}>
+                          {tokenSaveResult.text}
+                        </div>
+                      )}
+                    </form>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

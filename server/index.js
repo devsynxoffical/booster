@@ -87,8 +87,12 @@ async function ensureShopifyWebhooks(cleanShop, accessToken, publicAppUrl) {
 // Background & On-Demand Automated Order Synchronization Engine
 const lastSyncTimeMap = new Map();
 
+export function getStoreToken(store) {
+  return store?.accessToken || process.env.SHOPIFY_ACCESS_TOKEN || process.env.SHOPIFY_ADMIN_TOKEN || '';
+}
+
 async function syncStoreOrdersFromShopify(store, publicAppUrl) {
-  const token = store?.accessToken || process.env.SHOPIFY_ACCESS_TOKEN || process.env.SHOPIFY_ADMIN_TOKEN;
+  const token = getStoreToken(store);
   if (!store || !store.shopDomain || !token) {
     return { success: false, reason: 'Store missing accessToken' };
   }
@@ -119,18 +123,21 @@ async function syncStoreOrdersFromShopify(store, publicAppUrl) {
         : (ro.shipping_address?.name || 'Verified Customer');
       const city = ro.shipping_address?.city || ro.billing_address?.city || 'United States';
       const country = ro.shipping_address?.country || 'USA';
-      const firstItem = ro.line_items && ro.line_items[0] ? ro.line_items[0].title : 'Store Product';
+      const firstItem = ro.line_items && ro.line_items[0] ? ro.line_items[0].title : `Shopify Order #${ro.order_number || orderIdStr}`;
       const price = parseFloat(ro.total_price || ro.current_total_price || 0);
 
       const normalizedOrder = {
         id: orderIdStr,
+        order_number: ro.order_number || (ro.name ? parseInt(String(ro.name).replace('#', '')) : null),
         name: buyerName || 'Verified Customer',
         city: `${city}, ${country}`,
         product: firstItem,
         revenue: price,
         total_price: String(price.toFixed(2)),
         time: ro.created_at ? new Date(ro.created_at).toLocaleDateString() : 'Recent',
-        created_at: ro.created_at || new Date().toISOString()
+        created_at: ro.created_at || new Date().toISOString(),
+        financial_status: ro.financial_status || 'paid',
+        fulfillment_status: ro.fulfillment_status || 'unfulfilled'
       };
 
       if (existingIdx >= 0) {
@@ -673,8 +680,9 @@ async function startServer() {
     recalculateStoreOrders(store);
 
     // If store is connected to Shopify, check if background order sync is needed (>45s)
+    const token = getStoreToken(store);
     const lastSync = lastSyncTimeMap.get(store.id) || 0;
-    if (store.accessToken && (Date.now() - lastSync > 45000)) {
+    if (token && (Date.now() - lastSync > 45000)) {
       lastSyncTimeMap.set(store.id, Date.now());
       syncStoreOrdersFromShopify(store, data.appConfig?.publicAppUrl)
         .then(result => {
@@ -694,18 +702,24 @@ async function startServer() {
     const store = resolveStore(data, req);
     if (!store) return res.status(404).json({ success: false, error: 'Store not found' });
 
-    if (!store.accessToken) {
+    const token = getStoreToken(store);
+    const publicUrl = data.appConfig?.publicAppUrl || 'https://booster-5imz.onrender.com';
+    const webhookUrl = `${publicUrl}/api/webhooks/orders/create`;
+
+    if (!token) {
       recalculateStoreOrders(store);
       saveData(data);
       return res.json({
-        success: true,
-        message: `Verified and recalculated ${store.realOrders?.length || 0} real store orders!`,
+        success: false,
+        requiresToken: true,
+        message: 'No Shopify Admin API token configured. Configure your token or register the Webhook URL in Shopify Admin for automated syncing.',
         stats: store.stats,
-        orders: store.realOrders
+        orders: store.realOrders,
+        webhookUrl
       });
     }
 
-    const result = await syncStoreOrdersFromShopify(store, data.appConfig?.publicAppUrl);
+    const result = await syncStoreOrdersFromShopify(store, publicUrl);
     saveData(data);
 
     res.json({
@@ -715,7 +729,157 @@ async function startServer() {
         : `Order sync notice: ${result.error || result.reason}`,
       stats: store.stats,
       orders: store.realOrders,
-      details: result
+      details: result,
+      webhookUrl
+    });
+  });
+
+  // Get store orders list & sync configuration status
+  app.get('/api/stores/orders', (req, res) => {
+    const data = loadData();
+    const store = resolveStore(data, req);
+    if (!store) return res.status(404).json({ success: false, error: 'Store not found' });
+    recalculateStoreOrders(store);
+    res.json({
+      success: true,
+      orders: store.realOrders || [],
+      stats: store.stats,
+      hasToken: Boolean(getStoreToken(store)),
+      webhookUrl: `${data.appConfig?.publicAppUrl || 'https://booster-5imz.onrender.com'}/api/webhooks/orders/create`
+    });
+  });
+
+  // Save Shopify Admin API Access Token for active store
+  app.post('/api/stores/save-token', async (req, res) => {
+    const { accessToken } = req.body;
+    const data = loadData();
+    const store = resolveStore(data, req);
+    if (!store) return res.status(404).json({ success: false, error: 'Store not found' });
+
+    const cleanToken = (accessToken || '').trim();
+    if (!cleanToken) {
+      return res.status(400).json({ success: false, error: 'Access token cannot be empty' });
+    }
+
+    store.accessToken = cleanToken;
+    saveData(data);
+
+    // Immediately trigger live sync with Shopify
+    const syncRes = await syncStoreOrdersFromShopify(store, data.appConfig?.publicAppUrl);
+    saveData(data);
+
+    res.json({
+      success: true,
+      message: syncRes.success
+        ? `Token saved! Successfully synced ${syncRes.remoteOrdersCount || 0} orders from Shopify.`
+        : `Token saved! Live sync status: ${syncRes.error || syncRes.reason || 'Token updated'}`,
+      stats: store.stats,
+      orders: store.realOrders
+    });
+  });
+
+  // Parser helper for Shopify orders raw copied text
+  function parseShopifyOrdersText(raw) {
+    if (!raw || typeof raw !== 'string') return [];
+    const blocks = raw.split(/(?=Select\s+gid:\/\/shopify\/Order\/|\[#\d+\])/gi).filter(b => b.trim());
+    const parsed = [];
+    for (const block of blocks) {
+      const idMatch = block.match(/orders?\/(\d+)/i) || block.match(/Order\/(\d+)/i);
+      const numMatch = block.match(/\[#(\d+)\]|#(\d+)/);
+      const priceMatch = block.match(/\$([0-9,]+(?:\.[0-9]{2})?)/);
+      const orderId = idMatch ? (idMatch[1] || idMatch[2]) : (numMatch ? (numMatch[1] || numMatch[2]) : null);
+      const orderNumber = numMatch ? parseInt(numMatch[1] || numMatch[2], 10) : (orderId ? parseInt(orderId, 10) : null);
+      const price = priceMatch ? parseFloat(priceMatch[1].replace(/,/g, '')) : 0;
+
+      const lines = block.split('\n').map(l => l.trim()).filter(Boolean);
+      let time = 'Recent';
+      let name = 'Verified Customer';
+      for (let i = 0; i < lines.length; i++) {
+        if (lines[i].includes('Today at') || lines[i].includes('Yesterday at') || /^(Monday|Tuesday|Wednesday|Thursday|Friday|Saturday|Sunday)\s+at/i.test(lines[i])) {
+          time = lines[i];
+          if (lines[i + 1] && !lines[i + 1].startsWith('$') && lines[i + 1] !== 'Shop' && lines[i + 1] !== 'Paid') {
+            name = lines[i + 1];
+          }
+        }
+      }
+      const isPaid = /Paid/i.test(block);
+      const isFulfilled = /Fulfilled/i.test(block) && !/Unfulfilled/i.test(block);
+
+      if (orderId && price > 0) {
+        parsed.push({
+          id: String(orderId),
+          order_number: orderNumber,
+          name,
+          city: 'United States (US)',
+          product: `Shopify Order #${orderNumber || orderId} (${isPaid ? 'Paid' : 'Pending'}${isFulfilled ? ' & Fulfilled' : ''})`,
+          revenue: price,
+          total_price: price.toFixed(2),
+          time,
+          created_at: new Date().toISOString(),
+          financial_status: isPaid ? 'paid' : 'pending',
+          fulfillment_status: isFulfilled ? 'fulfilled' : 'unfulfilled'
+        });
+      }
+    }
+    return parsed;
+  }
+
+  // Import raw orders or text from Shopify Admin
+  app.post('/api/stores/import-orders', (req, res) => {
+    const { rawText, orders } = req.body;
+    const data = loadData();
+    const store = resolveStore(data, req);
+    if (!store) return res.status(404).json({ success: false, error: 'Store not found' });
+
+    let incomingOrders = [];
+    if (Array.isArray(orders) && orders.length > 0) {
+      incomingOrders = orders;
+    } else if (rawText) {
+      incomingOrders = parseShopifyOrdersText(rawText);
+    }
+
+    if (incomingOrders.length === 0) {
+      return res.status(400).json({ success: false, error: 'No orders could be parsed from the provided input.' });
+    }
+
+    if (!Array.isArray(store.realOrders)) store.realOrders = [];
+
+    let importedCount = 0;
+    for (const io of incomingOrders) {
+      const orderIdStr = String(io.id || io.order_number || '');
+      if (!orderIdStr) continue;
+
+      const idx = store.realOrders.findIndex(o => String(o.id || o.order_id || o.order_number) === orderIdStr);
+      if (idx >= 0) {
+        store.realOrders[idx] = { ...store.realOrders[idx], ...io };
+      } else {
+        store.realOrders.unshift(io);
+        importedCount++;
+
+        if (!store.stats.recentEvents) store.stats.recentEvents = [];
+        store.stats.recentEvents.unshift({
+          id: Date.now() + Math.random(),
+          type: 'popup_conversion',
+          product: io.product || 'Store Product',
+          revenue: io.revenue || 0,
+          buyer: `${io.name} (${io.city || 'United States'})`,
+          time: io.time || 'Just now'
+        });
+      }
+    }
+
+    if (store.stats.recentEvents?.length > 25) {
+      store.stats.recentEvents = store.stats.recentEvents.slice(0, 25);
+    }
+
+    recalculateStoreOrders(store);
+    saveData(data);
+
+    res.json({
+      success: true,
+      message: `Successfully processed ${incomingOrders.length} orders (${importedCount} new, ${incomingOrders.length - importedCount} updated)! Total revenue: $${store.stats.revenueGenerated.toFixed(2)}`,
+      stats: store.stats,
+      orders: store.realOrders
     });
   });
 
@@ -1607,13 +1771,15 @@ Available at ${store.storeName}. Handcrafted with premium ingredients and 5-star
     res.json({ ok: true, stats: store ? store.stats : null });
   });
 
-  // Webhook Receiver for live store order creation (multi-tenant)
-  app.post('/api/webhooks/orders/create', (req, res) => {
+  // Webhook Receiver for live store order creation & payment (multi-tenant)
+  app.post(['/api/webhooks/orders/create', '/api/webhooks/orders/paid', '/api/webhooks/orders/update', '/api/webhooks/orders'], (req, res) => {
     const order = req.body;
     const shopHeader = req.headers['x-shopify-shop-domain'] || '';
-    const data = loadData();
+    const topic = req.headers['x-shopify-topic'] || 'orders/create';
+    console.log(`[Shopify Webhook] Received topic="${topic}" for shop="${shopHeader}" orderId="${order?.id}" orderNumber="${order?.order_number}"`);
 
-    let store = data.stores.find(s => s.shopDomain === shopHeader);
+    const data = loadData();
+    let store = data.stores.find(s => s.shopDomain === shopHeader || (shopHeader && s.shopDomain.includes(shopHeader)));
     if (!store && data.stores.length > 0) store = data.stores[0];
 
     if (store && order && order.id) {
@@ -1621,27 +1787,36 @@ Available at ${store.storeName}. Handcrafted with premium ingredients and 5-star
       const orderIdStr = String(order.id);
       const existing = store.realOrders.find(o => String(o.id || o.order_id) === orderIdStr);
 
-      if (existing) {
-        return res.status(200).send('Order already recorded');
-      }
-
-      const buyerName = order.customer ? `${order.customer.first_name || ''} ${order.customer.last_name ? order.customer.last_name[0] + '.' : ''}`.trim() : 'Verified Customer';
-      const city = order.shipping_address?.city || order.billing_address?.city || 'Online Buyer';
+      const buyerName = order.customer 
+        ? `${order.customer.first_name || ''} ${order.customer.last_name ? order.customer.last_name[0] + '.' : ''}`.trim() 
+        : (order.shipping_address?.name || 'Verified Customer');
+      const city = order.shipping_address?.city || order.billing_address?.city || 'United States';
       const country = order.shipping_address?.country || 'USA';
-      const firstItem = order.line_items && order.line_items[0] ? order.line_items[0].title : 'Product';
+      const firstItem = order.line_items && order.line_items[0] ? order.line_items[0].title : `Shopify Order #${order.order_number || order.name || orderIdStr}`;
       const price = parseFloat(order.total_price || order.current_total_price || 0);
 
-      store.realOrders.unshift({
+      const normalized = {
         id: orderIdStr,
+        order_number: order.order_number || (order.name ? parseInt(String(order.name).replace('#', '')) : null),
         name: buyerName || 'Verified Customer',
         city: `${city}, ${country}`,
         product: firstItem,
         revenue: price,
         total_price: String(price.toFixed(2)),
         time: 'Just now',
-        created_at: order.created_at || new Date().toISOString()
-      });
+        created_at: order.created_at || new Date().toISOString(),
+        financial_status: order.financial_status || 'paid',
+        fulfillment_status: order.fulfillment_status || 'unfulfilled'
+      };
 
+      if (existing) {
+        Object.assign(existing, normalized);
+        recalculateStoreOrders(store);
+        saveData(data);
+        return res.status(200).send('Order updated successfully');
+      }
+
+      store.realOrders.unshift(normalized);
       recalculateStoreOrders(store);
 
       store.stats.recentEvents.unshift({
@@ -1666,7 +1841,8 @@ Available at ${store.storeName}. Handcrafted with premium ingredients and 5-star
       const data = loadData();
       if (!data.stores || data.stores.length === 0) return;
       for (const store of data.stores) {
-        if (!store.isActive || !store.accessToken) continue;
+        const token = getStoreToken(store);
+        if (!store.isActive || !token) continue;
         await syncStoreOrdersFromShopify(store, data.appConfig?.publicAppUrl);
       }
       saveData(data);

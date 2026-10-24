@@ -47,209 +47,272 @@
           "maxViewsPerCycle": 12,
           "targetPath": "/",
           "country": "US",
-          "dailyAddedCount": 1508,
+          "dailyAddedCount": 12800,
           "anchorTimestamp": 1792660000000,
           "anchorVisitors": 859,
           "anchorDailyCount": 605,
-          "lastRunTimestamp": 1792684646910
+          "lastRunTimestamp": 1792832039965
         }
       },
       "stats": {
-        "totalVisitors": 1762,
-        "pageViews": 3471,
+        "totalVisitors": 13054,
+        "pageViews": 25455,
         "uniqueVisitors": 1,
         "bounceRate": 0,
-        "organicVisitors": 1628,
-        "organicSharePercent": 92.4,
+        "organicVisitors": 12075,
+        "organicSharePercent": 92.5,
         "conversionRate": 0,
         "conversionUpliftPercent": 0,
-        "totalOrdersBoosted": 2,
-        "revenueGenerated": 173.47,
+        "totalOrdersBoosted": 5,
+        "revenueGenerated": 346.16,
         "popupImpressions": 18,
         "popupClicks": 4,
         "regions": {
-          "US": 1759
+          "US": 13054
         },
         "recentEvents": [
           {
-            "id": 1792684646910,
+            "id": 1792842780000,
+            "type": "popup_conversion",
+            "product": "Shopify Order #1094 (Paid)",
+            "revenue": 65.84,
+            "buyer": "Jerry Brack (United States)",
+            "time": "Today at 3:13 am"
+          },
+          {
+            "id": 1792825620000,
+            "type": "popup_conversion",
+            "product": "Shopify Order #1093 (Paid)",
+            "revenue": 53.49,
+            "buyer": "Ena Marenco (United States)",
+            "time": "Yesterday at 8:27 pm"
+          },
+          {
+            "id": 1792792320000,
+            "type": "popup_conversion",
+            "product": "Shopify Order #1092 (Paid & Fulfilled)",
+            "revenue": 53.36,
+            "buyer": "Marnichelle Clamohoy (United States)",
+            "time": "Yesterday at 11:12 am"
+          },
+          {
+            "id": 1792832039965,
             "type": "organic_visit",
-            "source": "Google Organic • Chicago, IL (US)",
+            "source": "Pinterest Rich Pin • Miami, FL (US)",
             "keyword": "/",
             "time": "Just now"
           },
           {
-            "id": 1792684643910,
+            "id": 1792832036965,
             "type": "organic_visit",
-            "source": "Pinterest Rich Pin • Chicago, IL (US)",
+            "source": "Google Organic • Dallas, TX (US)",
             "keyword": "/products",
             "time": "2m ago"
           },
           {
-            "id": 1792684640910,
+            "id": 1792832033965,
             "type": "organic_visit",
-            "source": "Google Organic • Seattle, WA (US)",
+            "source": "Google Organic • New York, NY (US)",
             "keyword": "/collections/all",
             "time": "3m ago"
           },
           {
-            "id": 1792684637910,
+            "id": 1792832030965,
             "type": "organic_visit",
-            "source": "Pinterest Rich Pin • San Francisco, CA (US)",
+            "source": "Pinterest Rich Pin • Chicago, IL (US)",
             "keyword": "/products",
             "time": "4m ago"
           },
           {
-            "id": 1792684634910,
+            "id": 1792832027965,
             "type": "organic_visit",
-            "source": "Pinterest Rich Pin • Austin, TX (US)",
+            "source": "TikTok Feed • Austin, TX (US)",
             "keyword": "/collections/all",
             "time": "5m ago"
           },
           {
-            "id": 1792684631910,
+            "id": 1792831919963,
             "type": "organic_visit",
-            "source": "Bing Search • Los Angeles, CA (US)",
-            "keyword": "/products",
-            "time": "6m ago"
-          },
-          {
-            "id": 1792684526909,
-            "type": "organic_visit",
-            "source": "Google Search (Rich Snippet) • Atlanta, GA (US)",
+            "source": "Bing Search • Phoenix, AZ (US)",
             "keyword": "/",
             "time": "Just now"
           },
           {
-            "id": 1792684523909,
+            "id": 1792831916963,
             "type": "organic_visit",
-            "source": "Bing Search • Chicago, IL (US)",
+            "source": "Pinterest Rich Pin • Boston, MA (US)",
             "keyword": "/products",
             "time": "2m ago"
           },
           {
-            "id": 1792684520909,
-            "type": "organic_visit",
-            "source": "Direct US Mobile • Chicago, IL (US)",
-            "keyword": "/collections/all",
-            "time": "3m ago"
-          },
-          {
-            "id": 1792684517909,
-            "type": "organic_visit",
-            "source": "Pinterest Rich Pin • Chicago, IL (US)",
-            "keyword": "/products",
-            "time": "4m ago"
-          },
-          {
-            "id": 1792684406907,
-            "type": "organic_visit",
-            "source": "TikTok Feed • Los Angeles, CA (US)",
-            "keyword": "/",
-            "time": "Just now"
-          },
-          {
-            "id": 1792684403907,
-            "type": "organic_visit",
-            "source": "Google Organic • San Francisco, CA (US)",
-            "keyword": "/products",
-            "time": "2m ago"
-          },
-          {
-            "id": 1792684400907,
+            "id": 1792831913963,
             "type": "organic_visit",
             "source": "DuckDuckGo Search • Houston, TX (US)",
             "keyword": "/collections/all",
             "time": "3m ago"
           },
           {
-            "id": 1792684397907,
+            "id": 1792831910963,
             "type": "organic_visit",
-            "source": "Google Organic • Austin, TX (US)",
+            "source": "Pinterest Rich Pin • Houston, TX (US)",
             "keyword": "/products",
             "time": "4m ago"
           },
           {
-            "id": 1792684394907,
+            "id": 1792831907963,
             "type": "organic_visit",
-            "source": "Google Search (Rich Snippet) • Phoenix, AZ (US)",
+            "source": "Direct US Mobile • Houston, TX (US)",
             "keyword": "/collections/all",
             "time": "5m ago"
           },
           {
-            "id": 1792684286905,
-            "type": "organic_visit",
-            "source": "DuckDuckGo Search • Miami, FL (US)",
-            "keyword": "/",
-            "time": "Just now"
-          },
-          {
-            "id": 1792684283905,
-            "type": "organic_visit",
-            "source": "Google Organic • Houston, TX (US)",
-            "keyword": "/products",
-            "time": "2m ago"
-          },
-          {
-            "id": 1792684280905,
-            "type": "organic_visit",
-            "source": "Google Search (Rich Snippet) • Dallas, TX (US)",
-            "keyword": "/collections/all",
-            "time": "3m ago"
-          },
-          {
-            "id": 1792684277905,
+            "id": 1792831904963,
             "type": "organic_visit",
             "source": "DuckDuckGo Search • Los Angeles, CA (US)",
             "keyword": "/products",
-            "time": "4m ago"
+            "time": "6m ago"
           },
           {
-            "id": 1792684274905,
+            "id": 1792831799959,
             "type": "organic_visit",
-            "source": "Pinterest Rich Pin • Los Angeles, CA (US)",
-            "keyword": "/collections/all",
-            "time": "5m ago"
-          },
-          {
-            "id": 1792684166904,
-            "type": "organic_visit",
-            "source": "TikTok Feed • Dallas, TX (US)",
+            "source": "Google Organic • Dallas, TX (US)",
             "keyword": "/",
             "time": "Just now"
           },
           {
-            "id": 1792684163904,
+            "id": 1792831796959,
             "type": "organic_visit",
-            "source": "Pinterest Rich Pin • New York, NY (US)",
+            "source": "Bing Search • Phoenix, AZ (US)",
             "keyword": "/products",
             "time": "2m ago"
           },
           {
-            "id": 1792684160904,
+            "id": 1792831793959,
             "type": "organic_visit",
-            "source": "TikTok Feed • Houston, TX (US)",
+            "source": "DuckDuckGo Search • Atlanta, GA (US)",
             "keyword": "/collections/all",
             "time": "3m ago"
           },
           {
-            "id": 1792684157904,
+            "id": 1792831541833,
             "type": "organic_visit",
-            "source": "Google Organic • Miami, FL (US)",
+            "source": "Bing Search • Austin, TX (US)",
+            "keyword": "/",
+            "time": "Just now"
+          },
+          {
+            "id": 1792831538833,
+            "type": "organic_visit",
+            "source": "TikTok Feed • Seattle, WA (US)",
+            "keyword": "/products",
+            "time": "2m ago"
+          },
+          {
+            "id": 1792831535833,
+            "type": "organic_visit",
+            "source": "Google Search (Rich Snippet) • New York, NY (US)",
+            "keyword": "/collections/all",
+            "time": "3m ago"
+          },
+          {
+            "id": 1792831532833,
+            "type": "organic_visit",
+            "source": "TikTok Feed • New York, NY (US)",
             "keyword": "/products",
             "time": "4m ago"
           },
           {
-            "id": 1792684046903,
+            "id": 1792831529833,
             "type": "organic_visit",
-            "source": "Direct US Mobile • Chicago, IL (US)",
+            "source": "Direct US Mobile • Austin, TX (US)",
+            "keyword": "/collections/all",
+            "time": "5m ago"
+          },
+          {
+            "id": 1792831526833,
+            "type": "organic_visit",
+            "source": "Bing Search • Austin, TX (US)",
+            "keyword": "/products",
+            "time": "6m ago"
+          },
+          {
+            "id": 1792827397142,
+            "type": "organic_visit",
+            "source": "TikTok Feed • New York, NY (US)",
             "keyword": "/",
             "time": "Just now"
+          },
+          {
+            "id": 1792827394142,
+            "type": "organic_visit",
+            "source": "Google Search (Rich Snippet) • Boston, MA (US)",
+            "keyword": "/products",
+            "time": "2m ago"
+          },
+          {
+            "id": 1792827391142,
+            "type": "organic_visit",
+            "source": "Direct US Mobile • Boston, MA (US)",
+            "keyword": "/collections/all",
+            "time": "3m ago"
+          },
+          {
+            "id": 1792825156247,
+            "type": "organic_visit",
+            "source": "TikTok Feed • Los Angeles, CA (US)",
+            "keyword": "/",
+            "time": "Just now"
+          },
+          {
+            "id": 1792825153247,
+            "type": "organic_visit",
+            "source": "Pinterest Rich Pin • San Francisco, CA (US)",
+            "keyword": "/products",
+            "time": "2m ago"
           }
         ]
       },
       "realProducts": [],
       "realOrders": [
+        {
+          "id": "7551651709223",
+          "order_number": 1094,
+          "name": "Jerry Brack",
+          "city": "United States (US)",
+          "product": "Shopify Order #1094 (Paid)",
+          "revenue": 65.84,
+          "total_price": "65.84",
+          "time": "Today at 3:13 am",
+          "created_at": "2026-10-24T03:13:00.000Z",
+          "fulfillment_status": "unfulfilled",
+          "financial_status": "paid"
+        },
+        {
+          "id": "7551293260071",
+          "order_number": 1093,
+          "name": "Ena Marenco",
+          "city": "United States (US)",
+          "product": "Shopify Order #1093 (Paid)",
+          "revenue": 53.49,
+          "total_price": "53.49",
+          "time": "Yesterday at 8:27 pm",
+          "created_at": "2026-10-23T20:27:00.000Z",
+          "fulfillment_status": "unfulfilled",
+          "financial_status": "paid"
+        },
+        {
+          "id": "7550275256615",
+          "order_number": 1092,
+          "name": "Marnichelle Clamohoy",
+          "city": "United States (US)",
+          "product": "Shopify Order #1092 (Paid & Fulfilled)",
+          "revenue": 53.36,
+          "total_price": "53.36",
+          "time": "Yesterday at 11:12 am",
+          "created_at": "2026-10-23T11:12:00.000Z",
+          "fulfillment_status": "fulfilled",
+          "financial_status": "paid"
+        },
         {
           "id": "7546335133991",
           "order_number": 1091,
